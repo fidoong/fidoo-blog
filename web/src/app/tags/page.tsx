@@ -30,7 +30,9 @@ export default function TagsPage() {
   // 获取选中的标签信息
   const selectedTag = useMemo(() => {
     if (!selectedTagName || !tagsData?.data) return null;
-    return tagsData.data.find((tag) => tag.name === selectedTagName || tag.slug === selectedTagName);
+    return tagsData.data.find(
+      (tag) => tag.name === selectedTagName || tag.slug === selectedTagName,
+    );
   }, [selectedTagName, tagsData]);
 
   const tags = tagsData?.data || [];
@@ -120,7 +122,8 @@ export default function TagsPage() {
                     <div className="mb-6">
                       <div className="flex flex-wrap gap-2">
                         {sortedTags.map((tag) => {
-                          const isSelected = selectedTagName === tag.name || selectedTagName === tag.slug;
+                          const isSelected =
+                            selectedTagName === tag.name || selectedTagName === tag.slug;
                           return (
                             <button
                               key={tag.id}

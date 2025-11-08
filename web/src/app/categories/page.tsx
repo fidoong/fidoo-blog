@@ -108,10 +108,6 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleClearCategory = () => {
-    router.push('/categories');
-  };
-
   return (
     <MainLayout>
       <div className="h-full flex bg-white">
@@ -212,9 +208,7 @@ export default function CategoriesPage() {
             )}
 
             {/* 标签云 */}
-            {tags.length > 0 && (
-              <CategoryTagCloud tags={tags.slice(0, 20)} maxTags={15} />
-            )}
+            {tags.length > 0 && <CategoryTagCloud tags={tags.slice(0, 20)} maxTags={15} />}
             <Sidebar />
           </div>
         </aside>

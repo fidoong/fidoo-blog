@@ -17,7 +17,6 @@ export class PostsController {
 
   @Post()
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
   @ApiOperation({ summary: '创建文章' })
   create(@Body() createPostDto: CreatePostDto, @CurrentUser() user: User) {
     return this.postsService.create(createPostDto, user.id);

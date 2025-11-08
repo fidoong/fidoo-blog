@@ -95,11 +95,7 @@ export function PostList({ params }: PostListProps) {
   return (
     <div className="space-y-8">
       {/* 加载骨架屏 - 仅在初始加载时显示 */}
-      {isLoading && allPosts.length === 0 && (
-        <div className="animate-in">
-          <PostListSkeleton />
-        </div>
-      )}
+      {isLoading && allPosts.length === 0 && <PostListSkeleton />}
 
       {/* 内容区域 - 使用淡入动画 */}
       {allPosts.length > 0 && (

@@ -1,31 +1,31 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/store/auth';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PostList } from '@/components/post/PostList';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { User, Mail, Calendar, BookOpen } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/utils/format';
 import Image from 'next/image';
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { user, isAuthenticated, setUser } = useAuthStore();
+  const { user, isAuthenticated, setUser, _hasHydrated } = useAuthStore();
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const { data: profileData } = useQuery({
     queryKey: ['profile'],
     queryFn: () => authApi.getProfile(),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && _hasHydrated,
   });
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
+    if (_hasHydrated && !isAuthenticated) {
+      setLoginModalOpen(true);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, _hasHydrated]);
 
   useEffect(() => {
     if (profileData?.data) {
@@ -33,14 +33,32 @@ export default function ProfilePage() {
     }
   }, [profileData, setUser]);
 
-  if (!isAuthenticated || !user) {
-    return null;
+  // 等待 store 恢复完成
+  if (!_hasHydrated) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-16">
+            <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">加载中...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
   }
 
   const displayUser = profileData?.data || user;
 
   return (
     <MainLayout>
+      <AuthModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
+      {!isAuthenticated || !user ? (
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-16">
+            <p className="text-gray-600 mb-4">请先登录后查看个人中心</p>
+          </div>
+        </div>
+      ) : (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Profile Header */}
@@ -98,6 +116,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      )}
     </MainLayout>
   );
 }

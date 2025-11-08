@@ -238,6 +238,127 @@ video {
   perspective: 1000;
 }
 
+/* 更多动画效果 */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease-out forwards;
+}
+
+.slide-in-down {
+  animation: slideInDown 0.5s ease-out forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* 卡片悬停效果 */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* 列表项动画 */
+.list-item-enter {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: slideInUp 0.4s ease-out forwards;
+}
+
+/* 加载动画优化 */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
 /* 移动设备优化 */
 @media (prefers-reduced-motion: reduce) {
   *,

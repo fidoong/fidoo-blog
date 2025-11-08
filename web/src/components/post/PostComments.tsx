@@ -3,12 +3,13 @@
 import { useState, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import Link from 'next/link';
 import { commentsApi } from '@/lib/api/comments';
 import { useAuthStore } from '@/store/auth';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { formatRelativeTime } from '@/lib/utils/format';
 import { MessageCircle, Send, User } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 interface PostCommentsProps {
   postId: string;
@@ -19,14 +20,16 @@ export function PostComments({ postId }: PostCommentsProps) {
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
   const [parentId, setParentId] = useState<string | undefined>();
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['comments', postId],
     queryFn: () => commentsApi.getPostComments(postId, 'approved'),
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // 如果是 401 错误，不重试
-      if (error?.response?.status === 401) {
+      const err = error as { response?: { status?: number } };
+      if (err?.response?.status === 401) {
         return false;
       }
       return failureCount < 2;
@@ -158,6 +161,7 @@ export function PostComments({ postId }: PostCommentsProps) {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <AuthModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
       <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <MessageCircle className="h-6 w-6 text-primary-600" />
         评论 ({comments.length})
@@ -218,9 +222,12 @@ export function PostComments({ postId }: PostCommentsProps) {
       ) : (
         <div className="mb-8 p-4 bg-gray-50 rounded-lg text-center text-gray-600">
           请{' '}
-          <Link href="/login" className="text-primary-600 hover:text-primary-700">
+          <button
+            onClick={() => setLoginModalOpen(true)}
+            className="text-primary-600 hover:text-primary-700 underline"
+          >
             登录
-          </Link>{' '}
+          </button>{' '}
           后发表评论
         </div>
       )}

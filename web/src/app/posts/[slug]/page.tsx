@@ -90,9 +90,10 @@ export default function PostDetailPage({
       return likesApi.checkLike('post', post.id);
     },
     enabled: !!post?.id && isAuthenticated,
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // 如果是 401 错误，不重试
-      if (error?.response?.status === 401) {
+      const err = error as { response?: { status?: number } };
+      if (err?.response?.status === 401) {
         return false;
       }
       return failureCount < 1;
@@ -107,9 +108,10 @@ export default function PostDetailPage({
       return favoritesApi.checkFavorite(post.id);
     },
     enabled: !!post?.id && isAuthenticated,
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // 如果是 401 错误，不重试
-      if (error?.response?.status === 401) {
+      const err = error as { response?: { status?: number } };
+      if (err?.response?.status === 401) {
         return false;
       }
       return failureCount < 1;
@@ -245,6 +247,7 @@ export default function PostDetailPage({
                                 post.author.avatar.includes('.svg?') ||
                                 post.author.avatar.includes('/svg');
                               return isSvgAvatar ? (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={post.author.avatar}
                                   alt={post.author.nickname || post.author.username}

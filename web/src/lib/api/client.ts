@@ -124,11 +124,11 @@ class ApiClient {
               }
             }
           } catch (refreshError) {
-            // 刷新失败，清除 token 并跳转到登录页
+            // 刷新失败，清除 token 并跳转到首页
             if (typeof window !== 'undefined') {
               localStorage.removeItem('accessToken');
               localStorage.removeItem('refreshToken');
-              window.location.href = '/login';
+              window.location.href = '/';
             }
             return Promise.reject(refreshError);
           }
