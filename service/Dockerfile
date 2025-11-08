@@ -1,5 +1,5 @@
 # 构建阶段
-FROM node:18-alpine AS builder
+FROM dockerhub.azk8s.cn/library/node:18-alpine AS builder
 
 # 安装 pnpm
 RUN npm install -g pnpm
@@ -20,7 +20,7 @@ WORKDIR /app/service
 RUN pnpm build
 
 # 生产阶段
-FROM node:18-alpine
+FROM dockerhub.azk8s.cn/library/node:18-alpine
 
 # 安装 pnpm
 RUN npm install -g pnpm
