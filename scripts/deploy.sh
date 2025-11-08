@@ -36,7 +36,13 @@ check_requirements() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
+    # 检查 docker-compose 或 docker compose
+    if command -v docker-compose &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+    elif docker compose version &> /dev/null 2>&1; then
+        DOCKER_COMPOSE_CMD="docker compose"
+        log_info "使用 docker compose（新版本）"
+    else
         log_error "Docker Compose 未安装，请先安装 Docker Compose"
         exit 1
     fi
@@ -105,10 +111,10 @@ backup_before_deploy() {
     
     TIMESTAMP=$(date +%Y%m%d_%H%M%S)
     
-    # 备份数据库
-    if docker-compose ps postgres | grep -q "Up"; then
+    # 备份数据库（使用 eval 处理带空格的命令）
+    if eval "$DOCKER_COMPOSE_CMD ps postgres" 2>/dev/null | grep -q "Up"; then
         log_info "备份数据库..."
-        docker-compose exec -T postgres pg_dump -U postgres fidoo_blog > "$BACKUP_DIR/db_backup_$TIMESTAMP.sql" || log_warn "数据库备份失败"
+        eval "$DOCKER_COMPOSE_CMD exec -T postgres pg_dump -U postgres fidoo_blog" > "$BACKUP_DIR/db_backup_$TIMESTAMP.sql" || log_warn "数据库备份失败"
     fi
     
     # 备份上传文件
@@ -126,10 +132,12 @@ build_images() {
     
     cd "$PROJECT_DIR"
     
+    # DOCKER_COMPOSE_CMD 已在 check_requirements 中设置
+    
     if [ "$ENVIRONMENT" = "production" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+        eval "$DOCKER_COMPOSE_CMD -f docker-compose.yml -f docker-compose.prod.yml build --no-cache"
     else
-        docker-compose build --no-cache
+        eval "$DOCKER_COMPOSE_CMD build --no-cache"
     fi
     
     log_info "镜像构建完成"
@@ -142,9 +150,9 @@ start_services() {
     cd "$PROJECT_DIR"
     
     if [ "$ENVIRONMENT" = "production" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+        eval "$DOCKER_COMPOSE_CMD -f docker-compose.yml -f docker-compose.prod.yml up -d"
     else
-        docker-compose up -d
+        eval "$DOCKER_COMPOSE_CMD up -d"
     fi
     
     log_info "等待服务启动..."
@@ -161,11 +169,11 @@ check_services_health() {
     services=("postgres" "redis" "service" "web" "admin" "nginx")
     
     for service in "${services[@]}"; do
-        if docker-compose ps "$service" | grep -q "Up"; then
+        if eval "$DOCKER_COMPOSE_CMD ps $service" 2>/dev/null | grep -q "Up"; then
             log_info "$service 服务运行正常"
         else
             log_error "$service 服务启动失败"
-            docker-compose logs "$service"
+            eval "$DOCKER_COMPOSE_CMD logs $service"
             exit 1
         fi
     done
@@ -181,7 +189,7 @@ run_migrations() {
     log_info "等待数据库就绪..."
     sleep 5
     
-    docker-compose exec -T service sh -c "cd /app && npm run migration:run" || {
+    eval "$DOCKER_COMPOSE_CMD exec -T service sh -c 'cd /app && npm run migration:run'" || {
         log_warn "数据库迁移失败，请手动检查"
     }
     
@@ -203,8 +211,8 @@ main() {
     run_migrations
     
     log_info "部署完成！"
-    log_info "查看服务状态: docker-compose ps"
-    log_info "查看日志: docker-compose logs -f"
+    log_info "查看服务状态: $DOCKER_COMPOSE_CMD ps"
+    log_info "查看日志: $DOCKER_COMPOSE_CMD logs -f"
 }
 
 main "$@"
