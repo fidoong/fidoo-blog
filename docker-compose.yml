@@ -129,4 +129,3 @@ volumes:
 networks:
   fidoo-blog-network:
     driver: bridge
-
