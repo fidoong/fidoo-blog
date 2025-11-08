@@ -67,7 +67,7 @@ export class AppBootstrapConfig {
   private static configureCors(app: INestApplication, configService: ConfigService): void {
     const corsOriginsEnv = configService.get<string>('CORS_ORIGINS', '').split(',').filter(Boolean);
     const defaultOrigins = [
-      'http://localhost:3001',
+      'http://localhost:3000',
       'http://localhost:3002',
       'http://localhost:3003',
     ];

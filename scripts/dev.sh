@@ -250,16 +250,16 @@ check_ports() {
         log_success "端口 3005 可用（后端）"
     fi
     
-    # 前端端口 3001
-    if lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
-        log_warning "端口 3001 已被占用，可能已有前端服务在运行"
+    # 前端端口 3000
+    if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+        log_warning "端口 3000 已被占用，可能已有前端服务在运行"
         read -p "是否继续？(y/n) " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             exit 1
         fi
     else
-        log_success "端口 3001 可用（前端）"
+        log_success "端口 3000 可用（前端）"
     fi
 }
 
@@ -273,7 +273,7 @@ start_dev_services() {
     log_info "服务配置："
     log_info "  后端服务: http://localhost:3005"
     log_info "  API 文档: http://localhost:3005/api/v1/docs"
-    log_info "  前端服务: http://localhost:3001"
+    log_info "  前端服务: http://localhost:3000"
     echo ""
     
     # 检查是否安装了 tmux

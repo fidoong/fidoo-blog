@@ -58,7 +58,7 @@ echo ""
 # 检查 CORS 配置
 log_info "检查 CORS 配置..."
 CORS_HEADERS=$(curl -s -I -X OPTIONS \
-  -H "Origin: http://localhost:3001" \
+  -H "Origin: http://localhost:3000" \
   -H "Access-Control-Request-Method: GET" \
   http://localhost:3005/api/v1/health 2>/dev/null | grep -i "access-control" || echo "")
 
@@ -69,14 +69,14 @@ if echo "$CORS_HEADERS" | grep -qi "access-control-allow-origin"; then
     done
 else
     log_warning "CORS 配置可能有问题"
-    log_info "请检查后端 CORS 配置是否允许 http://localhost:3001"
+    log_info "请检查后端 CORS 配置是否允许 http://localhost:3000"
 fi
 
 echo ""
 
 # 检查前端服务
-log_info "检查前端服务 (http://localhost:3001)..."
-if curl -s -o /dev/null -w "%{http_code}" http://localhost:3001 2>/dev/null | grep -q "200\|404"; then
+log_info "检查前端服务 (http://localhost:3000)..."
+if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null | grep -q "200\|404"; then
     log_success "前端服务正在运行"
 else
     log_error "前端服务未运行或无法访问"
@@ -122,12 +122,12 @@ else
     log_error "端口 3005 未被占用（后端服务可能未启动）"
 fi
 
-if lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
-    PROCESS=$(lsof -Pi :3001 -sTCP:LISTEN | tail -n 1)
-    log_success "端口 3001 已被占用（前端）"
+if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+    PROCESS=$(lsof -Pi :3000 -sTCP:LISTEN | tail -n 1)
+    log_success "端口 3000 已被占用（前端）"
     echo "  进程: $PROCESS"
 else
-    log_error "端口 3001 未被占用（前端服务可能未启动）"
+    log_error "端口 3000 未被占用（前端服务可能未启动）"
 fi
 
 echo ""

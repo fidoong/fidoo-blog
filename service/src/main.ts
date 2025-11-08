@@ -6,7 +6,7 @@ import { LoggerService } from '@/common/logger/logger.service';
 async function bootstrap() {
   // 在应用创建时直接配置 CORS
   const allowedOrigins = [
-    'http://localhost:3001',
+    'http://localhost:3000',
     'http://localhost:3002',
     'http://localhost:3003',
   ];
