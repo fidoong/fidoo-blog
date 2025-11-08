@@ -117,4 +117,90 @@ export class AuthService {
       throw BusinessException.unauthorized('令牌无效');
     }
   }
+
+  /**
+   * OAuth 登录：查找或创建用户
+   */
+  async findOrCreateOAuthUser(oauthData: {
+    provider: 'github' | 'wechat';
+    providerId: string;
+    email: string;
+    username: string;
+    nickname?: string;
+    avatar?: string;
+  }): Promise<User> {
+    // 先尝试通过邮箱查找用户
+    let user = await this.usersService.findByEmail(oauthData.email);
+
+    if (user) {
+      // 用户已存在，更新头像和昵称（如果提供）
+      if (oauthData.avatar && !user.avatar) {
+        user.avatar = oauthData.avatar;
+      }
+      if (oauthData.nickname && !user.nickname) {
+        user.nickname = oauthData.nickname;
+      }
+      // 使用 update 方法更新用户
+      const updateData: any = {};
+      if (user.avatar) {
+        updateData.avatar = user.avatar;
+      }
+      if (user.nickname) {
+        updateData.nickname = user.nickname;
+      }
+      if (Object.keys(updateData).length > 0) {
+        return await this.usersService.update(user.id, updateData);
+      }
+      return user;
+    }
+
+    // 用户不存在，创建新用户
+    // 生成一个随机密码（OAuth 用户不需要密码）
+    const randomPassword = await bcrypt.hash(
+      Math.random().toString(36).slice(-12),
+      10,
+    );
+
+    const createData: any = {
+      username: oauthData.username,
+      email: oauthData.email,
+      password: randomPassword,
+    };
+    if (oauthData.nickname) {
+      createData.nickname = oauthData.nickname;
+    }
+    if (oauthData.avatar) {
+      createData.avatar = oauthData.avatar;
+    }
+    user = await this.usersService.create(createData);
+
+    return user;
+  }
+
+  /**
+   * OAuth 登录成功后生成 token
+   */
+  async oauthLogin(user: User) {
+    const payload = {
+      sub: user.id,
+      username: user.username,
+      role: user.role,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('jwt.refreshSecret'),
+      expiresIn: this.configService.get('jwt.refreshExpiresIn'),
+    });
+
+    // 更新最后登录时间
+    await this.usersService.updateLastLogin(user.id, 'oauth');
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+      expiresIn: this.configService.get('jwt.expiresIn'),
+    };
+  }
 }

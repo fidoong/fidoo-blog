@@ -9,7 +9,7 @@ interface PageTransitionProps {
 }
 
 // 流畅的缓动函数
-const smoothEase = [0.25, 0.1, 0.25, 1];
+const smoothEase: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 
 const pageVariants = {
   initial: {
@@ -21,7 +21,7 @@ const pageVariants = {
     y: 0,
     transition: {
       duration: 0.35,
-      ease: smoothEase,
+      ease: smoothEase as [number, number, number, number],
     },
   },
   exit: {
@@ -29,7 +29,7 @@ const pageVariants = {
     y: -12,
     transition: {
       duration: 0.25,
-      ease: smoothEase,
+      ease: smoothEase as [number, number, number, number],
     },
   },
 };
@@ -45,7 +45,7 @@ export function PageTransition({ children }: PageTransitionProps) {
         animate="animate"
         exit="exit"
         variants={pageVariants}
-        className="w-full"
+        className="w-full h-full"
         style={{
           willChange: 'transform, opacity',
           transform: 'translateZ(0)', // 启用硬件加速
@@ -56,4 +56,3 @@ export function PageTransition({ children }: PageTransitionProps) {
     </AnimatePresence>
   );
 }
-

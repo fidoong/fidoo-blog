@@ -47,4 +47,25 @@ export const authApi = {
     const response = await apiClient.post('/auth/logout');
     return response.data;
   },
+
+  // GitHub OAuth 授权
+  getGithubAuthUrl: (): string => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    return `${apiUrl}/auth/github`;
+  },
+
+  // 微信 OAuth 授权
+  getWechatAuthUrl: (): string => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    return `${apiUrl}/auth/wechat`;
+  },
+
+  // OAuth 回调处理
+  handleOAuthCallback: async (
+    provider: 'github' | 'wechat',
+    code: string,
+  ): Promise<ApiResponse<LoginResponse>> => {
+    const response = await apiClient.post(`/auth/${provider}/callback`, { code });
+    return response.data;
+  },
 };

@@ -12,7 +12,7 @@ import { validate as uuidValidate } from 'uuid';
  */
 @ValidatorConstraint({ async: false })
 export class IsUuidConstraint implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: any, _args: ValidationArguments) {
     if (typeof value !== 'string') {
       return false;
     }
@@ -28,7 +28,7 @@ export class IsUuidConstraint implements ValidatorConstraintInterface {
  * UUID 验证装饰器
  */
 export function IsUuid(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: Record<string, any>, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

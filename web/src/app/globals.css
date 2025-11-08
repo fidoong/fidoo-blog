@@ -18,8 +18,8 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb)))
-    rgb(var(--background-start-rgb));
+  background: #ffffff;
+  overflow: hidden;
 }
 
 @layer utilities {
@@ -28,23 +28,30 @@ body {
   }
 }
 
-/* 自定义滚动条样式 */
+/* 全局滚动条样式 - 优化 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #94a3b8;
+}
+
+/* Firefox 滚动条样式 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 /* Markdown 内容样式 */
@@ -114,64 +121,48 @@ body {
   @apply bg-gray-100 font-semibold;
 }
 
-/* 自定义滚动条样式 - 用于侧边栏 */
+/* 自定义滚动条样式 - 用于独立滚动区域 */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
 
-/* 内部滚动区域（分类和标签列表） */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
-  border-radius: 10px;
-  margin: 2px 0;
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
-  border-radius: 10px;
+  background: #cbd5e1;
+  border-radius: 3px;
   transition: background 0.2s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #94a3b8, #64748b);
+  background: #94a3b8;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(to bottom, #64748b, #475569);
+/* 主内容区域滚动条 - 更细更优雅 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* 侧边栏主容器的滚动条 - 更细更隐蔽 */
+/* 侧边栏滚动条 - 更细 */
 aside.custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
-}
-
-aside.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  width: 5px;
 }
 
 aside.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 10px;
-  transition: background 0.2s ease;
+  background: #d1d5db;
 }
 
 aside.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
-}
-
-/* 滚动条默认半透明，悬停时更明显 */
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  opacity: 0.5;
-}
-
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  opacity: 1;
+  background: #9ca3af;
 }
 
 /* 防止布局偏移和闪烁 */
@@ -184,6 +175,10 @@ aside.custom-scrollbar::-webkit-scrollbar-thumb:hover {
     animation: fadeIn 0.5s ease-in-out;
   }
 
+  .zoom-in-95 {
+    animation: zoomIn95 0.2s ease-in-out;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -192,6 +187,17 @@ aside.custom-scrollbar::-webkit-scrollbar-thumb:hover {
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes zoomIn95 {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 }

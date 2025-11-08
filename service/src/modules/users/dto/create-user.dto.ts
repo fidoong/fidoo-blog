@@ -28,4 +28,9 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @ApiProperty({ description: '头像', required: false })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }

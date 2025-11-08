@@ -17,6 +17,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { User, UserRole } from '@/modules/users/entities/user.entity';
 import { CommentStatus } from './entities/comment.entity';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('comments')
 @Controller('comments')
@@ -30,6 +31,7 @@ export class CommentsController {
     return this.commentsService.create(createCommentDto, user.id, ip);
   }
 
+  @Public()
   @Get('post/:postId')
   @ApiOperation({ summary: '获取文章的评论' })
   @ApiQuery({ name: 'status', enum: CommentStatus, required: false })

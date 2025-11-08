@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, Matches } from 'class-validator';
+import { IsString, IsOptional, Matches, IsUUID } from 'class-validator';
 
 export class CreateTagDto {
   @ApiProperty({ description: '标签名称' })
@@ -15,4 +15,9 @@ export class CreateTagDto {
   @IsString()
   @Matches(/^#[0-9A-F]{6}$/i, { message: '颜色必须是有效的十六进制格式' })
   color?: string;
+
+  @ApiProperty({ description: '所属分类 ID', required: false })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 }

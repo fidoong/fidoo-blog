@@ -22,9 +22,51 @@ export class CategoriesController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: '获取所有分类' })
+  @ApiOperation({ summary: '获取所有分类（扁平列表）' })
   findAll() {
     return this.categoriesService.findAllSorted();
+  }
+
+  @Public()
+  @Get('tree')
+  @ApiOperation({ summary: '获取分类树形结构（大类及其子分类）' })
+  findTree() {
+    return this.categoriesService.findTree();
+  }
+
+  @Public()
+  @Get('tree/stats')
+  @ApiOperation({ summary: '获取分类树形结构及统计信息' })
+  async findTreeWithStats() {
+    return this.categoriesService.getCategoriesWithStats();
+  }
+
+  @Public()
+  @Get(':id/stats')
+  @ApiOperation({ summary: '获取分类统计信息' })
+  async getStats(@Param('id') id: string) {
+    return this.categoriesService.getCategoryStats(id);
+  }
+
+  @Public()
+  @Get('main')
+  @ApiOperation({ summary: '获取所有大类（level = 0）' })
+  findMainCategories() {
+    return this.categoriesService.findMainCategories();
+  }
+
+  @Public()
+  @Get('parent/:parentId')
+  @ApiOperation({ summary: '根据父分类 ID 获取子分类' })
+  findByParentId(@Param('parentId') parentId: string) {
+    return this.categoriesService.findByParentId(parentId);
+  }
+
+  @Public()
+  @Get('slug/:slug')
+  @ApiOperation({ summary: '通过 slug 获取分类详情' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.categoriesService.findBySlug(slug);
   }
 
   @Public()

@@ -1,5 +1,3 @@
-import { Express } from 'express';
-
 /**
  * 文件相关类型定义
  */

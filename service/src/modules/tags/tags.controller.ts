@@ -28,6 +28,20 @@ export class TagsController {
   }
 
   @Public()
+  @Get('category/:categoryId')
+  @ApiOperation({ summary: '根据分类 ID 获取标签' })
+  findByCategoryId(@Param('categoryId') categoryId: string) {
+    return this.tagsService.findByCategoryId(categoryId);
+  }
+
+  @Public()
+  @Get('slug/:slug')
+  @ApiOperation({ summary: '通过 slug 获取标签详情' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.tagsService.findBySlug(slug);
+  }
+
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: '获取标签详情' })
   findOne(@Param('id') id: string) {

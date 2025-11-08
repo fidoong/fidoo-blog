@@ -24,6 +24,13 @@ export function PostComments({ postId }: PostCommentsProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['comments', postId],
     queryFn: () => commentsApi.getPostComments(postId, 'approved'),
+    retry: (failureCount, error: any) => {
+      // 如果是 401 错误，不重试
+      if (error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 
   const createMutation = useMutation({

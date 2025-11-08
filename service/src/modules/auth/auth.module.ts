@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { GithubStrategy } from './strategies/github.strategy';
+import { WechatStrategy } from './strategies/wechat.strategy';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { UsersModule } from '@/modules/users/users.module';
@@ -31,6 +33,8 @@ import { UsersModule } from '@/modules/users/users.module';
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    GithubStrategy,
+    WechatStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

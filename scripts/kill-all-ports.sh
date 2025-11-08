@@ -3,7 +3,7 @@
 # 清理所有项目端口的脚本
 # 用法: ./scripts/kill-all-ports.sh
 
-PORTS=(3001 3002 3003 3005)
+PORTS=(3000 3001 3002 3003 3005)
 
 echo "Cleaning up all project ports..."
 echo "Ports to clean: ${PORTS[*]}"

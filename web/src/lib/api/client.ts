@@ -69,8 +69,12 @@ class ApiClient {
       async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-        // 开发环境下打印错误信息
-        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+        // 开发环境下打印错误信息（401 错误不打印，避免刷屏）
+        if (
+          typeof window !== 'undefined' &&
+          process.env.NODE_ENV === 'development' &&
+          error.response?.status !== 401
+        ) {
           console.error('[API Error]', {
             url: originalRequest?.url,
             method: originalRequest?.method,

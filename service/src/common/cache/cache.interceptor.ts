@@ -17,7 +17,6 @@ export class CacheInterceptor implements NestInterceptor {
   ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest();
     const handler = context.getHandler();
 
     // 检查是否跳过缓存

@@ -4,11 +4,10 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { authApi } from '@/lib/api/auth';
-import { postsApi } from '@/lib/api/posts';
 import { useAuthStore } from '@/store/auth';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PostList } from '@/components/post/PostList';
-import { User, Mail, Calendar, BookOpen, Heart, MessageCircle } from 'lucide-react';
+import { User, Mail, Calendar, BookOpen } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/utils/format';
 import Image from 'next/image';
 

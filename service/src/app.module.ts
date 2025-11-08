@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { BullModule } from '@nestjs/bull';
@@ -13,6 +12,7 @@ import appConfig from '@/config/app.config';
 import databaseConfig from '@/config/database.config';
 import redisConfig from '@/config/redis.config';
 import jwtConfig from '@/config/jwt.config';
+import oauthConfig from '@/config/oauth.config';
 
 // 公共模块
 import { LoggerModule } from '@/common/logger/logger.module';
@@ -43,7 +43,7 @@ import { AppService } from './app.service';
     // 配置模块
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig, jwtConfig],
+      load: [appConfig, databaseConfig, redisConfig, jwtConfig, oauthConfig],
       envFilePath: ['.env.local', '.env'],
     }),
 

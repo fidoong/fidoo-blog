@@ -70,7 +70,7 @@ export class ObjectUtil {
   static flatten(obj: any, prefix: string = ''): Record<string, any> {
     const result: Record<string, any> = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const newKey = prefix ? `${prefix}.${key}` : key;
         if (this.isObject(obj[key])) {
           Object.assign(result, this.flatten(obj[key], newKey));
@@ -90,7 +90,7 @@ export class ObjectUtil {
   static removeNullish<T extends Record<string, any>>(obj: T): Partial<T> {
     const result: any = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key) && obj[key] != null) {
+      if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key] != null) {
         result[key] = obj[key];
       }
     }

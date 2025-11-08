@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Follow } from './entities/follow.entity';
-import { User } from '@/modules/users/entities/user.entity';
 import { UsersService } from '@/modules/users/users.service';
 import { NotificationsService } from '@/modules/notifications/notifications.service';
 import { NotificationType } from '@/modules/notifications/entities/notification.entity';

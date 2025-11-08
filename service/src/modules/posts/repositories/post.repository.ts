@@ -62,9 +62,20 @@ export class PostRepository extends BaseRepositoryService<Post> {
       queryBuilder = this.createPublishedQueryBuilder();
     }
 
-    // 应用分类筛选
+    // 应用分类筛选（支持大类，会查找所有子分类的文章）
     if (queryDto.categoryId) {
-      queryBuilder.andWhere('post.categoryId = :categoryId', { categoryId: queryDto.categoryId });
+      // 如果传入了 categoryLevel，且为 0（大类），查找所有子分类的文章
+      if (queryDto.categoryLevel === 0) {
+        queryBuilder.andWhere(
+          `post.categoryId IN (
+            SELECT id FROM categories WHERE parent_id = :categoryId
+          )`,
+          { categoryId: queryDto.categoryId },
+        );
+      } else {
+        // 子分类或普通分类，直接查找该分类下的文章
+        queryBuilder.andWhere('post.categoryId = :categoryId', { categoryId: queryDto.categoryId });
+      }
     }
 
     // 应用作者筛选
@@ -109,11 +120,28 @@ export class PostRepository extends BaseRepositoryService<Post> {
   }
 
   /**
-   * 根据分类查找文章
+   * 根据分类查找文章（支持大类，会查找所有子分类的文章）
    */
-  async findByCategory(categoryId: string, queryDto: QueryDto): Promise<[Post[], number]> {
+  async findByCategory(
+    categoryId: string,
+    queryDto: QueryDto,
+    categoryLevel?: number,
+  ): Promise<[Post[], number]> {
     const queryBuilder = this.createPublishedQueryBuilder();
-    queryBuilder.andWhere('post.categoryId = :categoryId', { categoryId });
+
+    // 如果传入的 categoryLevel 是 0（大类），需要查找所有子分类的文章
+    if (categoryLevel === 0) {
+      // 使用子查询查找所有子分类的 ID
+      queryBuilder.andWhere(
+        `post.categoryId IN (
+          SELECT id FROM categories WHERE parent_id = :categoryId
+        )`,
+        { categoryId },
+      );
+    } else {
+      // 子分类或普通分类，直接查找该分类下的文章
+      queryBuilder.andWhere('post.categoryId = :categoryId', { categoryId });
+    }
 
     // 应用其他查询条件
     if (queryDto.keyword) {

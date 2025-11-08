@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/create-tag.dto';
-import { UpdateTagDto } from './dto/update-tag.dto';
 import { BaseService } from '@/common/services';
 import { CacheService } from '@/common/cache';
 import { BusinessException } from '@/common';
@@ -39,6 +38,18 @@ export class TagsService extends BaseService<Tag> {
    */
   async findAllSorted(): Promise<Tag[]> {
     return this.repository.find({
+      relations: ['category'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * 根据分类 ID 查找标签
+   */
+  async findByCategoryId(categoryId: string): Promise<Tag[]> {
+    return this.repository.find({
+      where: { categoryId },
+      relations: ['category'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -47,7 +58,10 @@ export class TagsService extends BaseService<Tag> {
    * 根据 slug 查找标签
    */
   async findBySlug(slug: string): Promise<Tag> {
-    const tag = await this.repository.findOne({ where: { slug } });
+    const tag = await this.repository.findOne({
+      where: { slug },
+      relations: ['category'],
+    });
     if (!tag) {
       throw BusinessException.notFound('标签不存在');
     }

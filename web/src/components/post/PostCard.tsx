@@ -33,9 +33,9 @@ export function PostCard({ post, featured = false, priority = false }: PostCardP
               'relative w-full overflow-hidden bg-gray-100',
               featured ? 'h-64 md:h-80' : 'h-48 md:h-56',
             )}
-            style={{ aspectRatio: featured ? '16/9' : '16/10' }}
           >
             <Image
+              key={`post-card-${post.id}-${post.coverImage}`}
               src={post.coverImage}
               alt={post.title}
               fill
@@ -49,6 +49,7 @@ export function PostCard({ post, featured = false, priority = false }: PostCardP
               placeholder="blur"
               blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
               className="object-cover group-hover:scale-110 transition-transform duration-500"
+              style={{ objectPosition: 'center' }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
@@ -60,7 +61,7 @@ export function PostCard({ post, featured = false, priority = false }: PostCardP
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {post.category && (
             <Link
-              href={`/categories/${post.category.slug}`}
+              href={`/categories?category=${encodeURIComponent(post.category.slug)}`}
               className="px-3 py-1 text-xs font-medium text-primary-600 bg-primary-50 rounded-full hover:bg-primary-100 transition-colors"
             >
               {post.category.name}
@@ -69,7 +70,7 @@ export function PostCard({ post, featured = false, priority = false }: PostCardP
           {post.tags.slice(0, 3).map((tag) => (
             <Link
               key={tag.id}
-              href={`/tags/${tag.slug}`}
+              href={`/tags?tag=${encodeURIComponent(tag.name)}`}
               className="px-3 py-1 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
             >
               {tag.name}

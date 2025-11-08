@@ -29,11 +29,13 @@ export type DeepPartial<T> = {
 /**
  * 函数类型
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type FunctionType = (...args: any[]) => any;
 
 /**
  * 构造函数类型
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type ConstructorType<T = any> = new (...args: any[]) => T;
 
 /**
@@ -49,7 +51,9 @@ export type EmptyObject = Record<string, never>;
 /**
  * 异步函数返回类型
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AsyncReturnType<T extends (...args: any) => Promise<any>> = T extends (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ...args: any
 ) => Promise<infer R>
   ? R

@@ -100,7 +100,7 @@ export class TransformService {
    */
   flatten(obj: any, prefix = '', result: any = {}): any {
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const newKey = prefix ? `${prefix}.${key}` : key;
         if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
           this.flatten(obj[key], newKey, result);
@@ -118,7 +118,7 @@ export class TransformService {
   unflatten(flatObj: any): any {
     const result: any = {};
     for (const key in flatObj) {
-      if (flatObj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(flatObj, key)) {
         const keys = key.split('.');
         let current = result;
         for (let i = 0; i < keys.length - 1; i++) {

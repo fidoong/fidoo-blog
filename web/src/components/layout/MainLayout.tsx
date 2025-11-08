@@ -1,19 +1,17 @@
 'use client';
 
 import { Header } from './Header';
-import { Footer } from './Footer';
 import { PageTransition } from './PageTransition';
 import { PageProgress } from './PageProgress';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <PageProgress />
       <Header />
-      <main className="flex-1 relative">
+      <main className="flex-1 overflow-hidden">
         <PageTransition>{children}</PageTransition>
       </main>
-      <Footer />
     </div>
   );
 }

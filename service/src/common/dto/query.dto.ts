@@ -73,6 +73,14 @@ export class QueryDto extends PaginationDto {
   categoryId?: string;
 
   @ApiPropertyOptional({
+    description: '分类层级（0: 大类, 1: 子分类）',
+    example: 0,
+  })
+  @IsOptional()
+  @IsIn([0, 1])
+  categoryLevel?: number;
+
+  @ApiPropertyOptional({
     description: '作者 ID',
     example: 'uuid',
   })

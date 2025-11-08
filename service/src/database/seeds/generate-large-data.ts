@@ -465,36 +465,248 @@ async function generateLargeData() {
     await userProfileRepository.save(profiles);
     console.log(`✅ 创建了 ${profiles.length} 个用户资料`);
 
-    // 3. 创建分类（10个）
-    console.log('📝 创建分类...');
-    const categoryNames = [
-      { name: '前端开发', slug: 'frontend', description: '前端技术相关文章' },
-      { name: '后端开发', slug: 'backend', description: '后端技术相关文章' },
-      { name: '移动开发', slug: 'mobile', description: '移动端开发相关文章' },
-      { name: '人工智能', slug: 'ai', description: 'AI 和机器学习相关文章' },
-      { name: '开发工具', slug: 'tools', description: '开发工具和效率提升' },
-      { name: '代码人生', slug: 'life', description: '程序员的生活和思考' },
-      { name: '数据库', slug: 'database', description: '数据库相关技术' },
-      { name: 'DevOps', slug: 'devops', description: 'DevOps 和运维相关' },
-      { name: '架构设计', slug: 'architecture', description: '系统架构设计' },
-      { name: '算法与数据结构', slug: 'algorithm', description: '算法和数据结构' },
+    // 3. 创建分类（树形结构：大类 -> 子分类）
+    console.log('📝 创建分类（树形结构）...');
+
+    // 定义大类（level=0）
+    const mainCategoriesData = [
+      {
+        name: '金融',
+        slug: 'finance',
+        description: '金融、投资、理财相关',
+        icon: '💰',
+        subCategories: [
+          { name: '股票投资', slug: 'stock', description: '股票市场分析与投资策略' },
+          { name: '基金理财', slug: 'fund', description: '基金产品与理财规划' },
+          { name: '数字货币', slug: 'crypto', description: '加密货币与区块链金融' },
+          { name: '保险', slug: 'insurance', description: '保险产品与风险管理' },
+          { name: '银行', slug: 'banking', description: '银行业务与金融服务' },
+        ],
+      },
+      {
+        name: '科技',
+        slug: 'tech',
+        description: '科技、互联网、IT技术',
+        icon: '💻',
+        subCategories: [
+          { name: '前端开发', slug: 'frontend', description: '前端技术相关文章' },
+          { name: '后端开发', slug: 'backend', description: '后端技术相关文章' },
+          { name: '移动开发', slug: 'mobile', description: '移动端开发相关文章' },
+          { name: '人工智能', slug: 'ai', description: 'AI 和机器学习相关文章' },
+          { name: '开发工具', slug: 'tools', description: '开发工具和效率提升' },
+          { name: '数据库', slug: 'database', description: '数据库相关技术' },
+          { name: 'DevOps', slug: 'devops', description: 'DevOps 和运维相关' },
+          { name: '架构设计', slug: 'architecture', description: '系统架构设计' },
+        ],
+      },
+      {
+        name: '游戏',
+        slug: 'gaming',
+        description: '游戏、电竞、游戏开发',
+        icon: '🎮',
+        subCategories: [
+          { name: '游戏评测', slug: 'game-review', description: '游戏产品评测与推荐' },
+          { name: '游戏开发', slug: 'game-dev', description: '游戏开发技术与引擎' },
+          { name: '电竞', slug: 'esports', description: '电子竞技赛事与选手' },
+          { name: '游戏攻略', slug: 'game-guide', description: '游戏攻略与技巧分享' },
+        ],
+      },
+      {
+        name: '体育',
+        slug: 'sports',
+        description: '体育、运动、健身',
+        icon: '⚽',
+        subCategories: [
+          { name: '足球', slug: 'football', description: '足球赛事与新闻' },
+          { name: '篮球', slug: 'basketball', description: '篮球赛事与新闻' },
+          { name: '健身', slug: 'fitness', description: '健身训练与营养' },
+          { name: '跑步', slug: 'running', description: '跑步训练与马拉松' },
+        ],
+      },
+      {
+        name: '政治',
+        slug: 'politics',
+        description: '政治、社会、时事',
+        icon: '🏛️',
+        subCategories: [
+          { name: '时政', slug: 'current-affairs', description: '时事政治与政策解读' },
+          { name: '国际', slug: 'international', description: '国际关系与外交' },
+          { name: '社会', slug: 'society', description: '社会现象与民生' },
+        ],
+      },
+      {
+        name: '生活',
+        slug: 'life',
+        description: '生活、娱乐、文化',
+        icon: '🎨',
+        subCategories: [
+          { name: '美食', slug: 'food', description: '美食制作与探店' },
+          { name: '旅行', slug: 'travel', description: '旅行攻略与游记' },
+          { name: '摄影', slug: 'photography', description: '摄影技巧与作品分享' },
+          { name: '阅读', slug: 'reading', description: '读书笔记与书评' },
+          { name: '电影', slug: 'movie', description: '电影评论与推荐' },
+        ],
+      },
     ];
 
-    const categories = categoryNames.map((cat, index) =>
-      categoryRepository.create({
-        ...cat,
-        sortOrder: index + 1,
+    // 创建大类
+    const mainCategories: Category[] = [];
+    for (let i = 0; i < mainCategoriesData.length; i++) {
+      const mainCat = mainCategoriesData[i];
+      const mainCategory = categoryRepository.create({
+        name: mainCat.name,
+        slug: mainCat.slug,
+        description: mainCat.description,
+        icon: mainCat.icon,
+        level: 0,
+        parentId: null,
+        sortOrder: i + 1,
         isActive: true,
-      }),
-    );
-    await categoryRepository.save(categories);
-    console.log(`✅ 创建了 ${categories.length} 个分类`);
+      });
+      mainCategories.push(mainCategory);
+    }
+    await categoryRepository.save(mainCategories);
+    console.log(`✅ 创建了 ${mainCategories.length} 个大类`);
 
-    // 4. 创建标签（60个）
-    console.log('📝 创建标签...');
-    const tags = techTags.map((tag) => tagRepository.create(tag));
+    // 创建子分类
+    const allCategories: Category[] = [...mainCategories];
+    for (let i = 0; i < mainCategories.length; i++) {
+      const mainCategory = mainCategories[i];
+      const mainCatData = mainCategoriesData[i];
+      const subCategories: Category[] = [];
+
+      for (let j = 0; j < mainCatData.subCategories.length; j++) {
+        const subCat = mainCatData.subCategories[j];
+        const subCategory = categoryRepository.create({
+          name: subCat.name,
+          slug: subCat.slug,
+          description: subCat.description,
+          icon: null,
+          level: 1,
+          parentId: mainCategory.id,
+          sortOrder: j + 1,
+          isActive: true,
+        });
+        subCategories.push(subCategory);
+      }
+
+      await categoryRepository.save(subCategories);
+      allCategories.push(...subCategories);
+      console.log(`  ✅ 为"${mainCategory.name}"创建了 ${subCategories.length} 个子分类`);
+    }
+
+    console.log(
+      `✅ 总共创建了 ${allCategories.length} 个分类（${mainCategories.length} 个大类 + ${allCategories.length - mainCategories.length} 个子分类）`,
+    );
+
+    // 4. 创建标签（关联到分类）
+    console.log('📝 创建标签（关联到分类）...');
+    const tags: Tag[] = [];
+    const createdTagNames = new Set<string>(); // 跟踪已创建的标签名称
+
+    // 为每个子分类创建 3-8 个相关标签
+    const subCategories = allCategories.filter((cat) => cat.level === 1);
+
+    // 技术类标签（关联到科技类的子分类）
+    const techSubCategories = subCategories.filter(
+      (cat) => cat.parentId === mainCategories.find((m) => m.slug === 'tech')?.id,
+    );
+
+    // 为科技类子分类分配标签
+    const techCategoryMap: Record<string, string[]> = {
+      frontend: ['JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular', '前端', 'CSS', 'HTML'],
+      backend: ['Node.js', 'NestJS', 'Express', 'Python', 'Java', 'Go', '后端', 'API'],
+      mobile: ['React Native', 'Flutter', 'Swift', 'Kotlin', '移动开发', 'iOS', 'Android'],
+      ai: ['AI', '机器学习', '深度学习', 'TensorFlow', 'PyTorch', '神经网络'],
+      tools: ['Git', 'GitHub', 'Docker', 'Kubernetes', 'CI/CD', 'DevOps', 'Linux'],
+      database: ['MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'Elasticsearch', '数据库'],
+      devops: ['Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'CI/CD', 'DevOps'],
+      architecture: ['微服务', '架构设计', '设计模式', '系统设计', '分布式'],
+    };
+
+    for (const subCat of techSubCategories) {
+      const tagNames = techCategoryMap[subCat.slug] || [];
+      for (const tagName of tagNames) {
+        // 如果标签名称已存在，跳过（避免重复）
+        if (createdTagNames.has(tagName)) {
+          continue;
+        }
+
+        const existingTag = techTags.find((t) => t.name === tagName);
+        if (existingTag) {
+          const tag = tagRepository.create({
+            ...existingTag,
+            categoryId: subCat.id,
+          });
+          tags.push(tag);
+          createdTagNames.add(tagName);
+        }
+      }
+    }
+
+    // 为其他分类创建通用标签
+    const otherTags = [
+      { name: '投资', slug: 'investment', color: '#FF6B6B' },
+      { name: '理财', slug: 'finance', color: '#4ECDC4' },
+      { name: '股票', slug: 'stock', color: '#45B7D1' },
+      { name: '游戏评测', slug: 'game-review', color: '#96CEB4' },
+      { name: '游戏开发', slug: 'game-dev', color: '#FFEAA7' },
+      { name: '电竞', slug: 'esports', color: '#DDA0DD' },
+      { name: '足球', slug: 'football', color: '#98D8C8' },
+      { name: '篮球', slug: 'basketball', color: '#F7DC6F' },
+      { name: '健身', slug: 'fitness', color: '#BB8FCE' },
+      { name: '时政', slug: 'politics', color: '#85C1E2' },
+      { name: '美食', slug: 'food', color: '#F8B739' },
+      { name: '旅行', slug: 'travel', color: '#52BE80' },
+      { name: '摄影', slug: 'photography', color: '#5DADE2' },
+    ];
+
+    // 为其他分类分配标签
+    for (const subCat of subCategories.filter((cat) => !techSubCategories.includes(cat))) {
+      const relevantTags = otherTags.filter(
+        (t) => subCat.slug.includes(t.slug) || t.slug.includes(subCat.slug.split('-')[0]),
+      );
+
+      for (const tagData of relevantTags.slice(0, 3)) {
+        // 如果标签名称已存在，跳过（避免重复）
+        if (createdTagNames.has(tagData.name)) {
+          continue;
+        }
+
+        const tag = tagRepository.create({
+          name: tagData.name,
+          slug: tagData.slug,
+          color: tagData.color,
+          categoryId: subCat.id,
+        });
+        tags.push(tag);
+        createdTagNames.add(tagData.name);
+      }
+    }
+
+    // 添加一些未分类的通用标签
+    const uncategorizedTags = [
+      { name: '热门', slug: 'hot', color: '#E74C3C' },
+      { name: '推荐', slug: 'recommended', color: '#3498DB' },
+      { name: '精华', slug: 'featured', color: '#F39C12' },
+    ];
+
+    for (const tagData of uncategorizedTags) {
+      // 如果标签名称已存在，跳过（避免重复）
+      if (createdTagNames.has(tagData.name)) {
+        continue;
+      }
+
+      const tag = tagRepository.create({
+        ...tagData,
+        categoryId: null,
+      });
+      tags.push(tag);
+      createdTagNames.add(tagData.name);
+    }
+
     await tagRepository.save(tags);
-    console.log(`✅ 创建了 ${tags.length} 个标签`);
+    console.log(`✅ 创建了 ${tags.length} 个标签（已关联到分类）`);
 
     // 5. 创建文章（1000篇）
     console.log('📝 创建文章...');
@@ -521,8 +733,16 @@ async function generateLargeData() {
       const content = contentTemplate.replace(/{title}/g, title).replace(/{topic}/g, topic);
 
       const author = randomChoice(allUsers);
-      const category = randomChoice(categories);
-      const selectedTags = randomChoices(tags, randomInt(2, 5));
+      // 优先选择子分类，如果没有则选择大类
+      const subCategories = allCategories.filter((cat) => cat.level === 1);
+      const category =
+        subCategories.length > 0 ? randomChoice(subCategories) : randomChoice(mainCategories);
+      // 选择与分类相关的标签，如果没有则随机选择
+      const categoryTags = tags.filter((t) => t.categoryId === category.id);
+      const selectedTags =
+        categoryTags.length > 0
+          ? randomChoices(categoryTags, randomInt(2, Math.min(5, categoryTags.length)))
+          : randomChoices(tags, randomInt(2, 5));
       const publishedAt = randomDate(365); // 过去一年内
 
       const post = postRepository.create({
@@ -711,36 +931,52 @@ async function generateLargeData() {
     // 10. 更新统计数据
     console.log('📝 更新统计数据...');
 
-    // 更新文章统计
-    for (const post of allPosts) {
-      const postLikes = await likeRepository.count({
-        where: { targetType: LikeType.POST, targetId: post.id },
-      });
-      const postComments = await commentRepository.count({
-        where: { post: { id: post.id } },
-      });
-      const postFavorites = await favoriteRepository.count({
-        where: { post: { id: post.id } },
-      });
+    // 更新文章统计（批量更新以提高性能）
+    console.log('  更新文章统计数据...');
+    const postStats = await Promise.all(
+      allPosts.map(async (post) => {
+        const [postLikes, postComments, postFavorites] = await Promise.all([
+          likeRepository.count({
+            where: { targetType: LikeType.POST, targetId: post.id },
+          }),
+          commentRepository.count({
+            where: { post: { id: post.id } },
+          }),
+          favoriteRepository.count({
+            where: { post: { id: post.id } },
+          }),
+        ]);
+        return { post, postLikes, postComments, postFavorites };
+      }),
+    );
 
+    for (const { post, postLikes, postComments, postFavorites } of postStats) {
       post.likeCount = postLikes;
       post.commentCount = postComments;
       post.favoriteCount = postFavorites;
     }
     await postRepository.save(allPosts);
 
-    // 更新用户统计
-    for (const user of allUsers) {
-      const userPosts = await postRepository.count({
-        where: { author: { id: user.id }, status: PostStatus.PUBLISHED },
-      });
-      const userFollowers = await followRepository.count({
-        where: { following: { id: user.id } },
-      });
-      const userFollowings = await followRepository.count({
-        where: { follower: { id: user.id } },
-      });
+    // 更新用户统计（批量更新以提高性能）
+    console.log('  更新用户统计数据...');
+    const userStats = await Promise.all(
+      allUsers.map(async (user) => {
+        const [userPosts, userFollowers, userFollowings] = await Promise.all([
+          postRepository.count({
+            where: { author: { id: user.id }, status: PostStatus.PUBLISHED },
+          }),
+          followRepository.count({
+            where: { following: { id: user.id } },
+          }),
+          followRepository.count({
+            where: { follower: { id: user.id } },
+          }),
+        ]);
+        return { user, userPosts, userFollowers, userFollowings };
+      }),
+    );
 
+    for (const { user, userPosts, userFollowers, userFollowings } of userStats) {
       const profile = profiles.find((p) => p.user.id === user.id);
       if (profile) {
         profile.articleCount = userPosts;
@@ -752,8 +988,10 @@ async function generateLargeData() {
 
     console.log('✅ 数据生成完成！');
     console.log(`- 用户: ${allUsers.length} 个`);
-    console.log(`- 分类: ${categories.length} 个`);
-    console.log(`- 标签: ${tags.length} 个`);
+    console.log(
+      `- 分类: ${allCategories.length} 个（${mainCategories.length} 个大类 + ${allCategories.length - mainCategories.length} 个子分类）`,
+    );
+    console.log(`- 标签: ${tags.length} 个（已关联到分类）`);
     console.log(`- 文章: ${allPosts.length} 篇`);
     console.log(`- 评论: ${commentCount} 条`);
     console.log(`- 点赞: ${likeCount} 个`);

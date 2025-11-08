@@ -98,14 +98,19 @@ export interface CreatePostDto {
   isTop?: boolean;
 }
 
-// 分类类型
+// 分类类型（支持树形结构）
 export interface Category {
   id: string;
   name: string;
   slug: string;
   description: string | null;
+  parentId: string | null;
+  parent?: Category | null;
+  children?: Category[];
+  level: number; // 0: 大类, 1: 分类
   sortOrder: number;
   isActive: boolean;
+  icon: string | null; // 图标名称或 URL，用于大类显示
   createdAt: string;
   updatedAt: string;
 }
@@ -116,6 +121,8 @@ export interface Tag {
   name: string;
   slug: string;
   color: string | null;
+  categoryId: string | null;
+  category?: Category | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -146,6 +153,7 @@ export interface CreateCommentDto {
 export interface PostQueryParams extends PaginationParams {
   status?: PostStatus;
   categoryId?: string;
+  categoryLevel?: number; // 0: 大类, 1: 子分类
   authorId?: string;
   keyword?: string;
   sortBy?: string;

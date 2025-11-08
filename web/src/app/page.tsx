@@ -51,24 +51,23 @@ const Sidebar = dynamic(
 export default function HomePage() {
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-          {/* Main Content - 可滚动区域 */}
-          <div className="lg:col-span-3">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">最新文章</h1>
-              <p className="text-gray-600">发现优质技术内容</p>
-            </div>
-            <PostList params={{ status: 'published', page: 1, pageSize: 12 }} />
-          </div>
-
-          {/* Sidebar - 固定侧边栏 */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-20 lg:self-start lg:pl-2">
-              <Sidebar />
+      <div className="h-full flex bg-white">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="w-full">
+              <div className="container mx-auto px-4 py-6 max-w-7xl">
+                <PostList params={{ status: 'published', page: 1, pageSize: 12 }} />
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Sidebar - 独立的导航和定制化卡片区域 */}
+        <aside className="hidden lg:block w-80 flex-shrink-0 border-l border-gray-100 bg-white overflow-y-auto custom-scrollbar">
+          <div className="p-4">
+            <Sidebar />
+          </div>
+        </aside>
       </div>
     </MainLayout>
   );

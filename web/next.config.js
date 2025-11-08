@@ -3,6 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   // 启用压缩
   compress: true,
+
   // 优化图片
   images: {
     remotePatterns: [
@@ -30,19 +31,38 @@ const nextConfig = {
     // 设备尺寸断点
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // 图片加载优化
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+
   // 性能优化
   experimental: {
     optimizeCss: true,
+    // 启用部分预渲染
+    ppr: false, // 暂时关闭，等待稳定
+    // 优化包大小
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
   },
+
   // 编译优化
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
   },
+
   // 输出优化
   swcMinify: true,
+
+  // 生产环境优化
+  productionBrowserSourceMaps: false,
+
+  // 启用静态优化
+  poweredByHeader: false,
   // 重写规则
   async rewrites() {
     return [
