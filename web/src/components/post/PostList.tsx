@@ -31,7 +31,6 @@ export function PostList({ params }: PostListProps) {
       },
       initialPageParam: 1,
     });
-
   // 合并所有页面的文章
   useEffect(() => {
     if (data?.pages) {

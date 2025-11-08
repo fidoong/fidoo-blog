@@ -36,12 +36,12 @@ COPY --from=builder /app/service/node_modules ./service_node_modules
 # 创建必要的目录
 RUN mkdir -p uploads logs
 
-# 暴露端口
-EXPOSE 3000
+# 暴露端口（通过环境变量 PORT 配置，默认 3005）
+EXPOSE 3005
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:${PORT:-3005}/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # 启动服务
 CMD ["node", "dist/main"]
