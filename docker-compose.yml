@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:16-alpine
+    container_name: fidoo-blog-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fidoo_blog
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fidoo-blog-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: fidoo-blog-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - fidoo-blog-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  # 后端服务
+  service:
+    build:
+      context: .
+      dockerfile: ./service/Dockerfile
+    container_name: fidoo-blog-service
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: fidoo_blog
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fidoo-blog-network
+    volumes:
+      - ./service/uploads:/app/uploads
+      - ./service/logs:/app/logs
+
+  # 前台网站
+  web:
+    build:
+      context: .
+      dockerfile: ./web/Dockerfile
+    container_name: fidoo-blog-web
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://service:3000/api
+    depends_on:
+      - service
+    networks:
+      - fidoo-blog-network
+
+  # 后台管理
+  admin:
+    build:
+      context: .
+      dockerfile: ./admin/Dockerfile
+    container_name: fidoo-blog-admin
+    restart: unless-stopped
+    ports:
+      - '3002:3000'
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://service:3000/api
+    depends_on:
+      - service
+    networks:
+      - fidoo-blog-network
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: fidoo-blog-nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - service
+      - web
+      - admin
+    networks:
+      - fidoo-blog-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  fidoo-blog-network:
+    driver: bridge
+

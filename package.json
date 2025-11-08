@@ -1,0 +1,45 @@
+{
+  "name": "fidoo-blog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "企业级博客系统 - Monorepo 架构",
+  "author": "Fidoo Team",
+  "license": "MIT",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "clean:ports": "./scripts/kill-all-ports.sh",
+    "prepare": "husky install",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "shared:build": "pnpm --filter @fidoo-blog/shared build",
+    "shared:dev": "pnpm --filter @fidoo-blog/shared dev",
+    "service:dev": "pnpm --filter @fidoo-blog/service dev",
+    "service:build": "pnpm --filter @fidoo-blog/service build",
+    "service:start": "pnpm --filter @fidoo-blog/service start:prod",
+    "web:dev": "pnpm --filter @fidoo-blog/web dev",
+    "admin:dev": "pnpm --filter @fidoo-blog/admin dev",
+    "app:dev": "pnpm --filter @fidoo-blog/app dev"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@types/node": "^20.10.5",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1",
+    "turbo": "^1.11.2",
+    "typescript": "^5.3.3"
+  }
+}

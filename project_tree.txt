@@ -1,0 +1,46 @@
+.
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── Makefile
+├── PROJECT_STRUCTURE.md
+├── README.md
+├── admin
+│   ├── Dockerfile
+│   ├── README.md
+│   ├── next.config.js
+│   ├── package.json
+│   └── tsconfig.json
+├── app
+│   ├── README.md
+│   └── package.json
+├── docker
+│   └── nginx
+├── docker-compose.yml
+├── docs
+│   ├── API.md
+│   ├── ARCHITECTURE.md
+│   ├── DEPLOYMENT.md
+│   └── QUICKSTART.md
+├── package.json
+├── pnpm-workspace.yaml
+├── project_tree.txt
+├── scripts
+│   ├── dev.sh
+│   └── setup.sh
+├── service
+│   ├── Dockerfile
+│   ├── env.example
+│   ├── nest-cli.json
+│   ├── package.json
+│   ├── src
+│   └── tsconfig.json
+├── turbo.json
+└── web
+    ├── Dockerfile
+    ├── README.md
+    ├── next.config.js
+    ├── package.json
+    └── tsconfig.json
+
+10 directories, 34 files

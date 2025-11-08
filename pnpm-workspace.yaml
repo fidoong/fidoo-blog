@@ -1,0 +1,6 @@
+packages:
+  - 'service'
+  - 'web'
+  - 'admin'
+  - 'app'
+  - 'packages/*'
