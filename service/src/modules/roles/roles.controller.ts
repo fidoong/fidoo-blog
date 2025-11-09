@@ -1,17 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { QueryRoleDto } from './dto/query-role.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
@@ -32,9 +24,13 @@ export class RolesController {
 
   @Get()
   @Permissions('roles:view')
-  @ApiOperation({ summary: '获取角色列表' })
-  findAll() {
-    return this.rolesService.findAll();
+  @ApiOperation({ summary: '获取角色列表（支持增强查询条件，带分页）' })
+  findAll(@Query() queryDto: QueryRoleDto) {
+    // 如果没有分页参数，返回所有角色（向后兼容）
+    if (!queryDto.page && !queryDto.pageSize && !queryDto.limit) {
+      return this.rolesService.findAll();
+    }
+    return this.rolesService.findAllEnhanced(queryDto);
   }
 
   @Get(':id')
@@ -58,4 +54,3 @@ export class RolesController {
     return this.rolesService.remove(id);
   }
 }
-

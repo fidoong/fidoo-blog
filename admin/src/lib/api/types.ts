@@ -200,27 +200,152 @@ export interface ProcessInfo {
   };
 }
 
-// 查询参数类型
-export interface PostQueryParams extends PaginationParams {
-  status?: PostStatus;
-  categoryId?: string;
-  categoryLevel?: number;
-  authorId?: string;
+// 基础查询参数类型
+export interface BaseQueryParams extends PaginationParams {
   keyword?: string;
+  ids?: string[];
+  createdAtFrom?: string;
+  createdAtTo?: string;
+  updatedAtFrom?: string;
+  updatedAtTo?: string;
+  includeDeleted?: boolean;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface UserQueryParams extends PaginationParams {
-  role?: 'admin' | 'editor' | 'user';
-  status?: 'active' | 'inactive' | 'banned';
-  keyword?: string;
+// 文章查询参数类型
+export interface PostQueryParams extends BaseQueryParams {
+  titleLike?: string;
+  slug?: string;
+  status?: PostStatus;
+  statuses?: PostStatus[];
+  authorId?: string;
+  authorIds?: string[];
+  categoryId?: string;
+  categoryIds?: string[];
+  tagId?: string;
+  tagIds?: string[];
+  isFeatured?: boolean;
+  isTop?: boolean;
+  minViewCount?: number;
+  maxViewCount?: number;
+  minLikeCount?: number;
+  maxLikeCount?: number;
+  publishedAtFrom?: string;
+  publishedAtTo?: string;
+  includeAuthor?: boolean;
+  includeCategory?: boolean;
+  includeTags?: boolean;
+  includeComments?: boolean;
+  // 向后兼容
+  categoryLevel?: number;
 }
 
-export interface CommentQueryParams extends PaginationParams {
+// 用户查询参数类型
+export interface UserQueryParams extends BaseQueryParams {
+  usernameLike?: string;
+  emailLike?: string;
+  nicknameLike?: string;
+  role?: 'admin' | 'editor' | 'user';
+  roles?: ('admin' | 'editor' | 'user')[];
+  status?: 'active' | 'inactive' | 'banned';
+  statuses?: ('active' | 'inactive' | 'banned')[];
+  includeProfile?: boolean;
+  includeRoles?: boolean;
+}
+
+// 分类查询参数类型
+export interface CategoryQueryParams extends BaseQueryParams {
+  nameLike?: string;
+  slug?: string;
+  parentId?: string;
+  parentIds?: string[];
+  rootOnly?: boolean;
+  level?: number;
+  levels?: number[];
+  isActive?: boolean;
+  minSortOrder?: number;
+  maxSortOrder?: number;
+  includeChildren?: boolean;
+  includeParent?: boolean;
+  includePostCount?: boolean;
+}
+
+// 标签查询参数类型
+export interface TagQueryParams extends BaseQueryParams {
+  nameLike?: string;
+  slug?: string;
+  categoryId?: string;
+  categoryIds?: string[];
+  color?: string;
+  includeCategory?: boolean;
+  includePostCount?: boolean;
+}
+
+// 评论查询参数类型
+export interface CommentQueryParams extends BaseQueryParams {
+  contentLike?: string;
   status?: CommentStatus;
-  postId?: string;
+  statuses?: CommentStatus[];
   userId?: string;
+  userIds?: string[];
+  postId?: string;
+  postIds?: string[];
+  parentId?: string;
+  rootOnly?: boolean;
+  minLikeCount?: number;
+  includeUser?: boolean;
+  includePost?: boolean;
+  includeChildren?: boolean;
+}
+
+// 角色查询参数类型
+export interface RoleQueryParams extends BaseQueryParams {
+  nameLike?: string;
+  code?: string;
+  codes?: string[];
+  status?: 'enabled' | 'disabled';
+  statuses?: ('enabled' | 'disabled')[];
+  isSystem?: boolean;
+  minSortOrder?: number;
+  maxSortOrder?: number;
+}
+
+// 权限查询参数类型
+export interface PermissionQueryParams extends BaseQueryParams {
+  nameLike?: string;
+  code?: string;
+  codes?: string[];
+  type?: 'menu' | 'button' | 'api' | 'data';
+  types?: ('menu' | 'button' | 'api' | 'data')[];
+  resource?: string;
+  action?: string;
+  path?: string;
+  method?: string;
+  status?: 'enabled' | 'disabled';
+  statuses?: ('enabled' | 'disabled')[];
+  parentId?: string;
+  rootOnly?: boolean;
+}
+
+// 菜单查询参数类型
+export interface MenuQueryParams extends BaseQueryParams {
+  nameLike?: string;
+  titleLike?: string;
+  code?: string;
+  codes?: string[];
+  type?: 'menu' | 'button' | 'link';
+  types?: ('menu' | 'button' | 'link')[];
+  status?: 'enabled' | 'disabled';
+  statuses?: ('enabled' | 'disabled')[];
+  parentId?: string;
+  rootOnly?: boolean;
+  isHidden?: boolean;
+  isCache?: boolean;
+  isExternal?: boolean;
+  permissionCode?: string;
+  includeChildren?: boolean;
+  includeParent?: boolean;
 }
 
 // 仪表盘统计类型

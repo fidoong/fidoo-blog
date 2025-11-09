@@ -6,4 +6,3 @@ export interface CategoryStatsDto {
   tagCount: number;
   latestPostAt: string | null;
 }
-

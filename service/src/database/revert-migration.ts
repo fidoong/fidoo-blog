@@ -1,4 +1,3 @@
-import { DataSource } from 'typeorm';
 import dataSource from './data-source';
 
 async function revertMigration() {
@@ -23,4 +22,3 @@ async function revertMigration() {
 }
 
 revertMigration();
-

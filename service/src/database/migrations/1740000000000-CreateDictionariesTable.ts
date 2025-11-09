@@ -49,4 +49,3 @@ export class CreateDictionariesTable1740000000000 implements MigrationInterface 
     await queryRunner.query(`DROP TABLE IF EXISTS dictionaries CASCADE;`);
   }
 }
-

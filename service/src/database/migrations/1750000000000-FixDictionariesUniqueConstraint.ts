@@ -15,7 +15,9 @@ export class FixDictionariesUniqueConstraint1750000000000 implements MigrationIn
     if (result && result.length > 0) {
       for (const row of result) {
         try {
-          await queryRunner.query(`ALTER TABLE dictionaries DROP CONSTRAINT IF EXISTS ${row.constraint_name};`);
+          await queryRunner.query(
+            `ALTER TABLE dictionaries DROP CONSTRAINT IF EXISTS ${row.constraint_name};`,
+          );
         } catch (error) {
           console.log(`约束 ${row.constraint_name} 可能不存在，跳过删除`);
         }
@@ -56,4 +58,3 @@ export class FixDictionariesUniqueConstraint1750000000000 implements MigrationIn
     `);
   }
 }
-

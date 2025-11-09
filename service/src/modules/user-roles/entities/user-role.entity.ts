@@ -20,4 +20,3 @@ export class UserRole extends BaseEntity {
   @JoinColumn({ name: 'role_id' })
   role: Role;
 }
-

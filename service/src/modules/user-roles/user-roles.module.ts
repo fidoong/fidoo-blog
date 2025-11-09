@@ -11,4 +11,3 @@ import { Role } from '@/modules/roles/entities/role.entity';
   exports: [UserRolesService],
 })
 export class UserRolesModule {}
-

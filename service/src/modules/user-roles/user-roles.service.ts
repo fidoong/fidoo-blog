@@ -41,9 +41,7 @@ export class UserRolesService {
 
     // 创建新角色关联
     if (roleIds.length > 0) {
-      const userRoles = roleIds.map((roleId) =>
-        this.userRoleRepository.create({ userId, roleId }),
-      );
+      const userRoles = roleIds.map((roleId) => this.userRoleRepository.create({ userId, roleId }));
       return await this.userRoleRepository.save(userRoles);
     }
 
@@ -72,4 +70,3 @@ export class UserRolesService {
     return userRoles.map((ur) => ur.user).filter((user): user is User => !!user);
   }
 }
-

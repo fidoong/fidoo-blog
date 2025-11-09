@@ -2,7 +2,7 @@ import { apiClient } from './client';
 import type { Post, PaginatedResponse, PostQueryParams, CreatePostDto } from './types';
 
 export const postsApi = {
-  // 获取文章列表
+  // 获取文章列表（支持增强查询条件）
   getPosts: async (params?: PostQueryParams): Promise<PaginatedResponse<Post>> => {
     return apiClient.get<PaginatedResponse<Post>>('/posts', { params });
   },

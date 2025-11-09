@@ -89,4 +89,3 @@ export class CreateMenuDto {
   @MaxLength(100)
   permissionCode?: string;
 }
-

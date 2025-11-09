@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TagsService } from './tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
+import { QueryTagDto } from './dto/query-tag.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRoleEnum } from '@/modules/users/entities/user.entity';
@@ -22,9 +23,13 @@ export class TagsController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: '获取所有标签' })
-  findAll() {
-    return this.tagsService.findAllSorted();
+  @ApiOperation({ summary: '获取标签列表（支持增强查询条件，带分页）' })
+  findAll(@Query() queryDto: QueryTagDto) {
+    // 如果没有分页参数，返回所有标签（向后兼容）
+    if (!queryDto.page && !queryDto.pageSize && !queryDto.limit) {
+      return this.tagsService.findAllSorted();
+    }
+    return this.tagsService.findAll(queryDto);
   }
 
   @Public()

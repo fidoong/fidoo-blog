@@ -68,4 +68,3 @@ export class CreateDictionaryDto {
   @IsBoolean()
   isSystem?: boolean;
 }
-

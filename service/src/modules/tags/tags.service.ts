@@ -3,9 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/create-tag.dto';
+import { QueryTagDto } from './dto/query-tag.dto';
 import { BaseService } from '@/common/services';
 import { CacheService } from '@/common/cache';
 import { BusinessException } from '@/common';
+import { PaginationResponseDto } from '@/common/dto';
 
 @Injectable()
 export class TagsService extends BaseService<Tag> {
@@ -41,6 +43,124 @@ export class TagsService extends BaseService<Tag> {
       relations: ['category'],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  /**
+   * 查找标签列表（支持增强查询条件，带分页）
+   */
+  async findAll(queryDto: QueryTagDto): Promise<PaginationResponseDto<Tag>> {
+    const {
+      keyword,
+      nameLike,
+      slug,
+      categoryId,
+      categoryIds,
+      color,
+      includeCategory,
+      includePostCount,
+      ids,
+      createdAtFrom,
+      createdAtTo,
+      updatedAtFrom,
+      updatedAtTo,
+      includeDeleted,
+      sortBy,
+      sortOrder,
+      skip,
+      take,
+    } = queryDto;
+
+    const queryBuilder = this.repository.createQueryBuilder('tag');
+
+    // 处理软删除
+    if (!includeDeleted) {
+      queryBuilder.andWhere('tag.deletedAt IS NULL');
+    }
+
+    // 关键词搜索
+    if (keyword) {
+      queryBuilder.andWhere('(tag.name LIKE :keyword OR tag.slug LIKE :keyword)', {
+        keyword: `%${keyword}%`,
+      });
+    }
+
+    // 名称模糊匹配
+    if (nameLike) {
+      queryBuilder.andWhere('tag.name LIKE :nameLike', { nameLike: `%${nameLike}%` });
+    }
+
+    // Slug精确匹配
+    if (slug) {
+      queryBuilder.andWhere('tag.slug = :slug', { slug });
+    }
+
+    // 分类查询
+    if (categoryIds && categoryIds.length > 0) {
+      queryBuilder.andWhere('tag.categoryId IN (:...categoryIds)', { categoryIds });
+    } else if (categoryId) {
+      queryBuilder.andWhere('tag.categoryId = :categoryId', { categoryId });
+    }
+
+    // 颜色查询
+    if (color) {
+      queryBuilder.andWhere('tag.color = :color', { color });
+    }
+
+    // ID列表查询
+    if (ids && ids.length > 0) {
+      queryBuilder.andWhere('tag.id IN (:...ids)', { ids });
+    }
+
+    // 日期范围查询
+    if (createdAtFrom) {
+      queryBuilder.andWhere('tag.createdAt >= :createdAtFrom', { createdAtFrom });
+    }
+    if (createdAtTo) {
+      queryBuilder.andWhere('tag.createdAt <= :createdAtTo', { createdAtTo });
+    }
+    if (updatedAtFrom) {
+      queryBuilder.andWhere('tag.updatedAt >= :updatedAtFrom', { updatedAtFrom });
+    }
+    if (updatedAtTo) {
+      queryBuilder.andWhere('tag.updatedAt <= :updatedAtTo', { updatedAtTo });
+    }
+
+    // 关联查询
+    if (includeCategory) {
+      queryBuilder.leftJoinAndSelect('tag.category', 'category');
+    }
+
+    // 排序
+    const orderBy = sortBy || 'name';
+    const orderDirection = sortOrder || 'ASC';
+    queryBuilder.orderBy(`tag.${orderBy}`, orderDirection);
+    if (orderBy !== 'createdAt') {
+      queryBuilder.addOrderBy('tag.createdAt', 'ASC');
+    }
+
+    // 分页
+    if (skip !== undefined) {
+      queryBuilder.skip(skip);
+    }
+    if (take !== undefined) {
+      queryBuilder.take(take);
+    }
+
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    // 如果需要包含文章统计
+    if (includePostCount) {
+      for (const item of items) {
+        const postCount = await this.repository
+          .createQueryBuilder('tag')
+          .innerJoin('tag.posts', 'post')
+          .where('tag.id = :tagId', { tagId: item.id })
+          .getCount();
+        (item as any).postCount = postCount;
+      }
+    }
+
+    return new PaginationResponseDto(items, total, queryDto.page || 1, take);
   }
 
   /**

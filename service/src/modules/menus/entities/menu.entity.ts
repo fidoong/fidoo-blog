@@ -74,4 +74,3 @@ export class Menu extends BaseEntity {
   @OneToMany(() => RoleMenu, (roleMenu) => roleMenu.menu)
   roleMenus: RoleMenu[];
 }
-

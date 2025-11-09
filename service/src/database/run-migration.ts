@@ -1,4 +1,3 @@
-import { DataSource } from 'typeorm';
 import dataSource from './data-source';
 
 async function runMigrations() {
@@ -9,7 +8,7 @@ async function runMigrations() {
 
     console.log('正在运行迁移...');
     const migrations = await dataSource.runMigrations();
-    
+
     if (migrations.length === 0) {
       console.log('✅ 没有待执行的迁移');
     } else {
@@ -31,4 +30,3 @@ async function runMigrations() {
 }
 
 runMigrations();
-

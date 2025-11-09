@@ -8,13 +8,14 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRoleEnum } from './entities/user.entity';
 import { QueryDto } from '@/common/dto';
+import { QueryUserDto } from './dto/query-user.dto';
 
 @ApiTags('users')
 @ApiBearerAuth('JWT-auth')
@@ -32,11 +33,8 @@ export class UsersController {
 
   @Get()
   @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
-  @ApiOperation({ summary: '获取用户列表' })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'pageSize', required: false, example: 10 })
-  @ApiQuery({ name: 'keyword', required: false })
-  findAll(@Query() queryDto: QueryDto) {
+  @ApiOperation({ summary: '获取用户列表（支持增强查询条件）' })
+  findAll(@Query() queryDto: QueryUserDto | QueryDto) {
     return this.usersService.findAll(queryDto);
   }
 

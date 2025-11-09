@@ -19,10 +19,10 @@ export class PermissionsGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
-      PERMISSIONS_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     // 如果没有要求权限，则允许访问
     if (!requiredPermissions || requiredPermissions.length === 0) {
@@ -51,4 +51,3 @@ export class PermissionsGuard implements CanActivate {
     return true;
   }
 }
-

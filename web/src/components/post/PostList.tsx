@@ -19,13 +19,24 @@ export function PostList({ params }: PostListProps) {
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['posts', params],
-      queryFn: ({ pageParam = 1 }) =>
-        postsApi.getPosts({ ...params, page: pageParam, pageSize: 12 }),
+      queryFn: ({ pageParam = 1 }) => {
+        const page = typeof pageParam === 'number' ? pageParam : Number(pageParam) || 1;
+        // 排除 params 中的 page 和 pageSize，使用 useInfiniteQuery 管理的值
+        const { page: _, pageSize: __, ...restParams } = params || {};
+        return postsApi.getPosts({ ...restParams, page, pageSize: 12 });
+      },
       getNextPageParam: (lastPage) => {
-        if (lastPage && lastPage.hasNext) {
-          const nextPage = lastPage.page + 1;
-          return nextPage;
+        if (!lastPage) return undefined;
+        
+        // 检查是否有下一页 - 支持多种判断方式
+        const hasNext = lastPage.hasNext === true || 
+                       (lastPage.page && lastPage.totalPages && lastPage.page < lastPage.totalPages);
+        
+        if (hasNext) {
+          const currentPage = typeof lastPage.page === 'number' ? lastPage.page : 1;
+          return currentPage + 1;
         }
+        
         return undefined;
       },
       initialPageParam: 1,
@@ -52,22 +63,28 @@ export function PostList({ params }: PostListProps) {
       return;
     }
 
-    // 如果已经没有下一页或正在加载，不设置 observer
-    if (!hasNextPage || isFetchingNextPage) {
+    // 如果已经没有下一页，不设置 observer
+    if (hasNextPage === false) {
       return;
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage && !isFetchingRef.current) {
+        if (
+          entry.isIntersecting &&
+          hasNextPage !== false &&
+          !isFetchingNextPage &&
+          !isFetchingRef.current
+        ) {
           isFetchingRef.current = true;
-          fetchNextPage().finally(() => {
-            // 延迟重置，避免快速重复触发
-            setTimeout(() => {
+          fetchNextPage()
+            .then(() => {
               isFetchingRef.current = false;
-            }, 500);
-          });
+            })
+            .catch(() => {
+              isFetchingRef.current = false;
+            });
         }
       },
       {
@@ -81,7 +98,7 @@ export function PostList({ params }: PostListProps) {
     return () => {
       observer.disconnect();
     };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, allPosts.length]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (error && allPosts.length === 0) {
     return (

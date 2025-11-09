@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Category } from './types';
+import type { Category, PaginatedResponse } from './types';
 
 // 分类统计信息类型
 export interface CategoryStats {
@@ -14,22 +14,50 @@ export interface CategoryStats {
 export const categoriesApi = {
   // 获取所有分类（扁平列表）
   getCategories: async (): Promise<Category[]> => {
-    return apiClient.get<Category[]>('/categories');
+    try {
+      const result = await apiClient.get<Category[] | PaginatedResponse<Category>>('/categories');
+      // 防御性检查：如果返回的是分页响应，提取 items
+      if (result && typeof result === 'object' && 'items' in result) {
+        return (result as PaginatedResponse<Category>).items || [];
+      }
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      return [];
+    }
   },
 
   // 获取分类树形结构（大类及其子分类）
   getCategoryTree: async (): Promise<Category[]> => {
-    return apiClient.get<Category[]>('/categories/tree');
+    try {
+      const result = await apiClient.get<Category[]>('/categories/tree');
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error fetching category tree:', error);
+      return [];
+    }
   },
 
   // 获取所有大类（level = 0）
   getMainCategories: async (): Promise<Category[]> => {
-    return apiClient.get<Category[]>('/categories/main');
+    try {
+      const result = await apiClient.get<Category[]>('/categories/main');
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error fetching main categories:', error);
+      return [];
+    }
   },
 
   // 根据父分类 ID 获取子分类
   getCategoriesByParentId: async (parentId: string): Promise<Category[]> => {
-    return apiClient.get<Category[]>(`/categories/parent/${parentId}`);
+    try {
+      const result = await apiClient.get<Category[]>(`/categories/parent/${parentId}`);
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error fetching categories by parent:', error);
+      return [];
+    }
   },
 
   // 获取分类详情（通过ID）
@@ -44,7 +72,15 @@ export const categoriesApi = {
 
   // 获取分类树形结构及统计信息
   getCategoryTreeWithStats: async (): Promise<(Category & { stats?: CategoryStats })[]> => {
-    return apiClient.get<(Category & { stats?: CategoryStats })[]>('/categories/tree/stats');
+    try {
+      const result = await apiClient.get<(Category & { stats?: CategoryStats })[]>(
+        '/categories/tree/stats',
+      );
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error fetching category tree with stats:', error);
+      return [];
+    }
   },
 
   // 获取分类统计信息

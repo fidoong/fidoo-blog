@@ -16,6 +16,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { User, UserRoleEnum } from '@/modules/users/entities/user.entity';
 import { CommentStatus } from './entities/comment.entity';
+import { QueryCommentDto } from './dto/query-comment.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 
@@ -42,16 +43,16 @@ export class CommentsController {
   @Get()
   @ApiBearerAuth('JWT-auth')
   @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
-  @ApiOperation({ summary: '获取所有评论（管理用）' })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
-  @ApiQuery({ name: 'status', enum: CommentStatus, required: false })
-  findAll(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('status') status?: CommentStatus,
-  ) {
-    return this.commentsService.findAll(page, limit, status);
+  @ApiOperation({ summary: '获取评论列表（支持增强查询条件）' })
+  findAll(@Query() queryDto: QueryCommentDto) {
+    // 向后兼容：如果没有使用新的查询参数，使用旧的方法
+    if (!queryDto.page && !queryDto.pageSize && !queryDto.limit && !queryDto.keyword) {
+      const page = queryDto.page || 1;
+      const limit = queryDto.pageSize || queryDto.limit || 10;
+      const status = queryDto.status;
+      return this.commentsService.findAll(page, limit, status);
+    }
+    return this.commentsService.findAllEnhanced(queryDto);
   }
 
   @Get(':id')

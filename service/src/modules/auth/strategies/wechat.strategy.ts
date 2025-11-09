@@ -24,7 +24,9 @@ export class WechatStrategy extends PassportStrategy(Strategy, 'wechat') {
     const appSecret = this.configService.get<string>('oauth.wechat.appSecret');
 
     if (!appId || !appSecret) {
-      throw new Error('微信 OAuth 配置未设置，请在环境变量中配置 WECHAT_APP_ID 和 WECHAT_APP_SECRET');
+      throw new Error(
+        '微信 OAuth 配置未设置，请在环境变量中配置 WECHAT_APP_ID 和 WECHAT_APP_SECRET',
+      );
     }
 
     // 使用 code 换取 access_token
@@ -39,7 +41,7 @@ export class WechatStrategy extends PassportStrategy(Strategy, 'wechat') {
     // 使用 access_token 获取用户信息
     const userInfoUrl = `https://api.weixin.qq.com/sns/userinfo?access_token=${access_token}&openid=${openid}`;
     const userInfoResponse = await axios.get(userInfoUrl);
-    const { nickname, headimgurl, unionid } = userInfoResponse.data;
+    const { nickname, headimgurl } = userInfoResponse.data;
 
     const email = `${openid}@wechat.local`;
     const username = `wechat_${openid}`;
@@ -57,4 +59,3 @@ export class WechatStrategy extends PassportStrategy(Strategy, 'wechat') {
     return user;
   }
 }
-

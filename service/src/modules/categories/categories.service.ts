@@ -6,9 +6,11 @@ import { Post } from '@/modules/posts/entities/post.entity';
 import { Tag } from '@/modules/tags/entities/tag.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategoryStatsDto } from './dto/category-stats.dto';
+import { QueryCategoryDto } from './dto/query-category.dto';
 import { BaseService } from '@/common/services';
 import { CacheService } from '@/common/cache';
 import { BusinessException } from '@/common';
+import { PaginationResponseDto } from '@/common/dto';
 
 @Injectable()
 export class CategoriesService extends BaseService<Category> {
@@ -47,6 +49,154 @@ export class CategoriesService extends BaseService<Category> {
     return this.repository.find({
       order: { sortOrder: 'ASC', createdAt: 'DESC' },
     });
+  }
+
+  /**
+   * 查找分类列表（支持增强查询条件，带分页）
+   */
+  async findAll(queryDto: QueryCategoryDto): Promise<PaginationResponseDto<Category>> {
+    const {
+      keyword,
+      nameLike,
+      slug,
+      parentId,
+      parentIds,
+      rootOnly,
+      level,
+      levels,
+      isActive,
+      minSortOrder,
+      maxSortOrder,
+      includeChildren,
+      includeParent,
+      includePostCount,
+      ids,
+      createdAtFrom,
+      createdAtTo,
+      updatedAtFrom,
+      updatedAtTo,
+      includeDeleted,
+      sortBy,
+      sortOrder,
+      skip,
+      take,
+    } = queryDto;
+
+    const queryBuilder = this.repository.createQueryBuilder('category');
+
+    // 处理软删除
+    if (!includeDeleted) {
+      queryBuilder.andWhere('category.deletedAt IS NULL');
+    }
+
+    // 关键词搜索
+    if (keyword) {
+      queryBuilder.andWhere(
+        '(category.name LIKE :keyword OR category.slug LIKE :keyword OR category.description LIKE :keyword)',
+        { keyword: `%${keyword}%` },
+      );
+    }
+
+    // 名称模糊匹配
+    if (nameLike) {
+      queryBuilder.andWhere('category.name LIKE :nameLike', { nameLike: `%${nameLike}%` });
+    }
+
+    // Slug精确匹配
+    if (slug) {
+      queryBuilder.andWhere('category.slug = :slug', { slug });
+    }
+
+    // 父分类查询
+    if (rootOnly) {
+      queryBuilder.andWhere('category.parentId IS NULL');
+    } else if (parentId !== undefined) {
+      if (parentId === null) {
+        queryBuilder.andWhere('category.parentId IS NULL');
+      } else {
+        queryBuilder.andWhere('category.parentId = :parentId', { parentId });
+      }
+    }
+    if (parentIds && parentIds.length > 0) {
+      queryBuilder.andWhere('category.parentId IN (:...parentIds)', { parentIds });
+    }
+
+    // 层级查询
+    if (levels && levels.length > 0) {
+      queryBuilder.andWhere('category.level IN (:...levels)', { levels });
+    } else if (level !== undefined) {
+      queryBuilder.andWhere('category.level = :level', { level });
+    }
+
+    // 激活状态
+    if (isActive !== undefined) {
+      queryBuilder.andWhere('category.isActive = :isActive', { isActive });
+    }
+
+    // 排序值范围
+    if (minSortOrder !== undefined) {
+      queryBuilder.andWhere('category.sortOrder >= :minSortOrder', { minSortOrder });
+    }
+    if (maxSortOrder !== undefined) {
+      queryBuilder.andWhere('category.sortOrder <= :maxSortOrder', { maxSortOrder });
+    }
+
+    // ID列表查询
+    if (ids && ids.length > 0) {
+      queryBuilder.andWhere('category.id IN (:...ids)', { ids });
+    }
+
+    // 日期范围查询
+    if (createdAtFrom) {
+      queryBuilder.andWhere('category.createdAt >= :createdAtFrom', { createdAtFrom });
+    }
+    if (createdAtTo) {
+      queryBuilder.andWhere('category.createdAt <= :createdAtTo', { createdAtTo });
+    }
+    if (updatedAtFrom) {
+      queryBuilder.andWhere('category.updatedAt >= :updatedAtFrom', { updatedAtFrom });
+    }
+    if (updatedAtTo) {
+      queryBuilder.andWhere('category.updatedAt <= :updatedAtTo', { updatedAtTo });
+    }
+
+    // 关联查询
+    if (includeParent) {
+      queryBuilder.leftJoinAndSelect('category.parent', 'parent');
+    }
+    if (includeChildren) {
+      queryBuilder.leftJoinAndSelect('category.children', 'children');
+    }
+
+    // 排序
+    const orderBy = sortBy || 'sortOrder';
+    const orderDirection = sortOrder || 'ASC';
+    queryBuilder.orderBy(`category.${orderBy}`, orderDirection);
+    if (orderBy !== 'createdAt') {
+      queryBuilder.addOrderBy('category.createdAt', 'ASC');
+    }
+
+    // 分页
+    if (skip !== undefined) {
+      queryBuilder.skip(skip);
+    }
+    if (take !== undefined) {
+      queryBuilder.take(take);
+    }
+
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    // 如果需要包含文章统计
+    if (includePostCount) {
+      for (const item of items) {
+        const stats = await this.getCategoryStats(item.id);
+        (item as any).postCount = stats.postCount;
+        (item as any).totalViews = stats.totalViews;
+        (item as any).totalLikes = stats.totalLikes;
+      }
+    }
+
+    return new PaginationResponseDto(items, total, queryDto.page || 1, take);
   }
 
   /**

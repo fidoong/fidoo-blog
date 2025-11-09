@@ -100,6 +100,23 @@ export class DictionariesController {
     return this.dictionariesService.findAllByType(type);
   }
 
+  @Get('stats/count')
+  @Permissions('dictionaries:view')
+  @ApiOperation({ summary: '统计字典数量（按条件分组）' })
+  countByConditions(@Query() queryDto: QueryDictionaryDto) {
+    return this.dictionariesService.countByConditions(queryDto);
+  }
+
+  @Get('exists/check')
+  @Permissions('dictionaries:view')
+  @ApiOperation({ summary: '检查字典是否存在（根据code和value）' })
+  @ApiQuery({ name: 'code', required: true, description: '字典编码' })
+  @ApiQuery({ name: 'value', required: false, description: '字典值' })
+  async existsByCodeAndValue(@Query('code') code: string, @Query('value') value?: string) {
+    const exists = await this.dictionariesService.existsByCodeAndValue(code, value || null);
+    return { exists };
+  }
+
   @Get(':id')
   @Permissions('dictionaries:view')
   @ApiOperation({ summary: '获取字典详情' })
@@ -126,5 +143,26 @@ export class DictionariesController {
   @ApiOperation({ summary: '批量删除字典' })
   removeMany(@Body() body: { ids: string[] }) {
     return this.dictionariesService.removeMany(body.ids);
+  }
+
+  @Post('batch-get')
+  @Permissions('dictionaries:view')
+  @ApiOperation({ summary: '批量查询字典（根据ID列表）' })
+  findByIds(@Body() body: { ids: string[]; includeRelations?: boolean }) {
+    return this.dictionariesService.findByIds(body.ids, body.includeRelations || false);
+  }
+
+  @Get(':id/path')
+  @Permissions('dictionaries:view')
+  @ApiOperation({ summary: '获取字典的完整路径（从根节点到当前节点）' })
+  getPath(@Param('id') id: string) {
+    return this.dictionariesService.getPath(id);
+  }
+
+  @Get(':id/children')
+  @Permissions('dictionaries:view')
+  @ApiOperation({ summary: '获取字典的所有子节点（扁平列表）' })
+  getAllChildren(@Param('id') id: string) {
+    return this.dictionariesService.getAllChildren(id);
   }
 }

@@ -56,7 +56,7 @@ export default function HomePage() {
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             <div className="w-full">
               <div className="container mx-auto px-4 py-6 max-w-7xl">
-                <PostList params={{ status: 'published', page: 1, pageSize: 12 }} />
+                <PostList params={{ status: 'published' }} />
               </div>
             </div>
           </div>

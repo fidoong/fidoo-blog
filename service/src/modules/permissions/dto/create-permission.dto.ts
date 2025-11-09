@@ -60,4 +60,3 @@ export class CreatePermissionDto {
   @IsOptional()
   sortOrder?: number;
 }
-

@@ -149,13 +149,43 @@ export interface CreateCommentDto {
   parentId?: string;
 }
 
-// 查询参数类型
-export interface PostQueryParams extends PaginationParams {
-  status?: PostStatus;
-  categoryId?: string;
-  categoryLevel?: number; // 0: 大类, 1: 子分类
-  authorId?: string;
+// 基础查询参数类型
+export interface BaseQueryParams extends PaginationParams {
   keyword?: string;
+  ids?: string[];
+  createdAtFrom?: string;
+  createdAtTo?: string;
+  updatedAtFrom?: string;
+  updatedAtTo?: string;
+  includeDeleted?: boolean;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
+}
+
+// 文章查询参数类型
+export interface PostQueryParams extends BaseQueryParams {
+  titleLike?: string;
+  slug?: string;
+  status?: PostStatus;
+  statuses?: PostStatus[];
+  authorId?: string;
+  authorIds?: string[];
+  categoryId?: string;
+  categoryIds?: string[];
+  tagId?: string;
+  tagIds?: string[];
+  isFeatured?: boolean;
+  isTop?: boolean;
+  minViewCount?: number;
+  maxViewCount?: number;
+  minLikeCount?: number;
+  maxLikeCount?: number;
+  publishedAtFrom?: string;
+  publishedAtTo?: string;
+  includeAuthor?: boolean;
+  includeCategory?: boolean;
+  includeTags?: boolean;
+  includeComments?: boolean;
+  // 向后兼容
+  categoryLevel?: number;
 }

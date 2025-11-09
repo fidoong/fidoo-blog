@@ -5,6 +5,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { CategoriesService } from '@/modules/categories/categories.service';
 import { TagsService } from '@/modules/tags/tags.service';
 import { QueryDto, PaginationResponseDto } from '@/common/dto';
+import { QueryPostDto } from './dto/query-post.dto';
 import { CacheService } from '@/common/cache';
 import { BusinessException } from '@/common';
 import { PostRepository } from './repositories/post.repository';
@@ -52,8 +53,8 @@ export class PostsService {
     return savedPost;
   }
 
-  async findAll(queryDto: QueryDto): Promise<PaginationResponseDto<Post>> {
-    // 使用 Repository 查找已发布的文章
+  async findAll(queryDto: QueryPostDto | QueryDto): Promise<PaginationResponseDto<Post>> {
+    // 使用 Repository 查找文章（支持增强查询）
     const [posts, total] = await this.postRepository.findPublished(queryDto);
 
     const pageSize = queryDto.pageSize || queryDto.limit || 10;

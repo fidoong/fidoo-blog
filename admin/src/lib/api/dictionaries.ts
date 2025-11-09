@@ -45,10 +45,35 @@ export interface DictionaryResponse {
 export interface QueryDictionaryParams {
   keyword?: string;
   code?: string;
+  codes?: string[];
   type?: 'tree' | 'dict';
+  types?: ('tree' | 'dict')[];
   status?: 'enabled' | 'disabled';
+  statuses?: ('enabled' | 'disabled')[];
   parentId?: string | null;
+  parentIds?: string[];
+  rootOnly?: boolean;
+  includeChildren?: boolean;
+  maxDepth?: number;
+  minDepth?: number;
+  value?: string;
+  valueLike?: string;
+  values?: string[];
+  label?: string;
+  labelLike?: string;
+  descriptionLike?: string;
+  extraKey?: string;
+  extraValue?: string;
+  extraPath?: string;
   isSystem?: boolean;
+  ids?: string[];
+  createdAtFrom?: string;
+  createdAtTo?: string;
+  updatedAtFrom?: string;
+  updatedAtTo?: string;
+  includeDeleted?: boolean;
+  includeParent?: boolean;
+  includeChildrenRelation?: boolean;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
   page?: number;
@@ -151,5 +176,45 @@ export const dictionariesApi = {
   // 批量删除字典
   batchDeleteDictionaries: async (ids: string[]): Promise<void> => {
     return apiClient.post<void>('/dictionaries/batch-delete', { ids });
+  },
+
+  // 批量查询字典（根据ID列表）
+  getDictionariesByIds: async (
+    ids: string[],
+    includeRelations?: boolean,
+  ): Promise<Dictionary[]> => {
+    return apiClient.post<Dictionary[]>('/dictionaries/batch-get', {
+      ids,
+      includeRelations,
+    });
+  },
+
+  // 统计字典数量（按条件分组）
+  getDictionaryStats: async (
+    params?: Partial<QueryDictionaryParams>,
+  ): Promise<{
+    total: number;
+    byType: Record<string, number>;
+    byStatus: Record<string, number>;
+    byCode: Record<string, number>;
+  }> => {
+    return apiClient.get('/dictionaries/stats/count', { params });
+  },
+
+  // 获取字典的完整路径（从根节点到当前节点）
+  getDictionaryPath: async (id: string): Promise<Dictionary[]> => {
+    return apiClient.get<Dictionary[]>(`/dictionaries/${id}/path`);
+  },
+
+  // 获取字典的所有子节点（扁平列表）
+  getDictionaryChildren: async (id: string): Promise<Dictionary[]> => {
+    return apiClient.get<Dictionary[]>(`/dictionaries/${id}/children`);
+  },
+
+  // 检查字典是否存在（根据code和value）
+  checkDictionaryExists: async (code: string, value?: string): Promise<{ exists: boolean }> => {
+    return apiClient.get<{ exists: boolean }>('/dictionaries/exists/check', {
+      params: { code, value },
+    });
   },
 };

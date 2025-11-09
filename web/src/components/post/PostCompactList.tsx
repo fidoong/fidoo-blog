@@ -19,12 +19,24 @@ export function PostCompactList({ params }: PostCompactListProps) {
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['posts', params],
-      queryFn: ({ pageParam = 1 }) =>
-        postsApi.getPosts({ ...params, page: pageParam, pageSize: 20 }),
+      queryFn: ({ pageParam = 1 }) => {
+        const page = typeof pageParam === 'number' ? pageParam : Number(pageParam) || 1;
+        // 排除 params 中的 page 和 pageSize，使用 useInfiniteQuery 管理的值
+        const { page: _, pageSize: __, ...restParams } = params || {};
+        return postsApi.getPosts({ ...restParams, page, pageSize: 20 });
+      },
       getNextPageParam: (lastPage) => {
-        if (lastPage && lastPage.hasNext) {
-          return lastPage.page + 1;
+        if (!lastPage) return undefined;
+        
+        // 检查是否有下一页 - 支持多种判断方式
+        const hasNext = lastPage.hasNext === true || 
+                       (lastPage.page && lastPage.totalPages && lastPage.page < lastPage.totalPages);
+        
+        if (hasNext) {
+          const currentPage = typeof lastPage.page === 'number' ? lastPage.page : 1;
+          return currentPage + 1;
         }
+        
         return undefined;
       },
       initialPageParam: 1,

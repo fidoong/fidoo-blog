@@ -5,7 +5,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryDto, PaginationResponseDto } from '@/common/dto';
-import { QueryBuilderHelper } from '@/common/helpers';
+import { QueryUserDto } from './dto/query-user.dto';
 import { CryptoUtil } from '@/common/utils';
 import { UserProfile } from '@/modules/user-profiles/entities/user-profile.entity';
 import { BusinessException } from '@/common';
@@ -65,22 +65,114 @@ export class UsersService {
     return savedUser;
   }
 
-  async findAll(queryDto: QueryDto): Promise<PaginationResponseDto<User>> {
-    const queryBuilder = this.usersRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.profile', 'profile');
+  async findAll(queryDto: QueryUserDto | QueryDto): Promise<PaginationResponseDto<User>> {
+    const isEnhancedQuery = 'usernameLike' in queryDto || 'roles' in queryDto;
+    const query = isEnhancedQuery ? (queryDto as QueryUserDto) : null;
+    const legacyQuery = !isEnhancedQuery ? (queryDto as QueryDto) : null;
 
-    // 应用查询条件
-    QueryBuilderHelper.applyQuery(
-      queryBuilder,
-      queryDto,
-      ['user.username', 'user.nickname', 'user.email'],
-      'user.createdAt',
-    );
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+
+    // 处理软删除
+    if (!query?.includeDeleted && !legacyQuery) {
+      queryBuilder.andWhere('user.deletedAt IS NULL');
+    }
+
+    // 关键词搜索
+    const keyword = query?.keyword || legacyQuery?.keyword;
+    if (keyword) {
+      queryBuilder.andWhere(
+        '(user.username LIKE :keyword OR user.email LIKE :keyword OR user.nickname LIKE :keyword)',
+        { keyword: `%${keyword}%` },
+      );
+    }
+
+    // 用户名模糊匹配
+    if (query?.usernameLike) {
+      queryBuilder.andWhere('user.username LIKE :usernameLike', {
+        usernameLike: `%${query.usernameLike}%`,
+      });
+    }
+
+    // 邮箱模糊匹配
+    if (query?.emailLike) {
+      queryBuilder.andWhere('user.email LIKE :emailLike', { emailLike: `%${query.emailLike}%` });
+    }
+
+    // 昵称模糊匹配
+    if (query?.nicknameLike) {
+      queryBuilder.andWhere('user.nickname LIKE :nicknameLike', {
+        nicknameLike: `%${query.nicknameLike}%`,
+      });
+    }
+
+    // 角色查询
+    if (query?.roles && query.roles.length > 0) {
+      queryBuilder.andWhere('user.role IN (:...roles)', { roles: query.roles });
+    } else if (query?.role) {
+      queryBuilder.andWhere('user.role = :role', { role: query.role });
+    }
+
+    // 状态查询
+    if (query?.statuses && query.statuses.length > 0) {
+      queryBuilder.andWhere('user.status IN (:...statuses)', { statuses: query.statuses });
+    } else if (query?.status) {
+      queryBuilder.andWhere('user.status = :status', { status: query.status });
+    }
+
+    // ID列表查询
+    if (query?.ids && query.ids.length > 0) {
+      queryBuilder.andWhere('user.id IN (:...ids)', { ids: query.ids });
+    }
+
+    // 日期范围查询
+    if (query?.createdAtFrom) {
+      queryBuilder.andWhere('user.createdAt >= :createdAtFrom', {
+        createdAtFrom: query.createdAtFrom,
+      });
+    }
+    if (query?.createdAtTo) {
+      queryBuilder.andWhere('user.createdAt <= :createdAtTo', { createdAtTo: query.createdAtTo });
+    }
+    if (query?.updatedAtFrom) {
+      queryBuilder.andWhere('user.updatedAt >= :updatedAtFrom', {
+        updatedAtFrom: query.updatedAtFrom,
+      });
+    }
+    if (query?.updatedAtTo) {
+      queryBuilder.andWhere('user.updatedAt <= :updatedAtTo', { updatedAtTo: query.updatedAtTo });
+    }
+
+    // 关联查询
+    if (query?.includeProfile) {
+      queryBuilder.leftJoinAndSelect('user.profile', 'profile');
+    }
+    if (query?.includeRoles) {
+      queryBuilder
+        .leftJoinAndSelect('user.userRoles', 'userRoles')
+        .leftJoinAndSelect('userRoles.role', 'role');
+    }
+    // 如果没有指定关联，默认加载profile（向后兼容）
+    if (!query || !query.includeProfile) {
+      queryBuilder.leftJoinAndSelect('user.profile', 'profile');
+    }
+
+    // 排序
+    const sortBy = query?.sortBy || legacyQuery?.sortBy || 'createdAt';
+    const sortOrder = query?.sortOrder || legacyQuery?.sortOrder || 'DESC';
+    const sortField = sortBy.startsWith('user.') ? sortBy : `user.${sortBy}`;
+    queryBuilder.orderBy(sortField, sortOrder);
+    if (sortBy !== 'createdAt') {
+      queryBuilder.addOrderBy('user.createdAt', 'DESC');
+    }
+
+    // 分页
+    const skip = query?.skip ?? legacyQuery?.skip ?? 0;
+    const take = query?.take ?? legacyQuery?.take ?? 10;
+    queryBuilder.skip(skip).take(take);
 
     const [users, total] = await queryBuilder.getManyAndCount();
 
-    return new PaginationResponseDto(users, total, queryDto.page || 1, queryDto.pageSize || 10);
+    return new PaginationResponseDto(users, total, queryDto.page || 1, take);
   }
 
   async findById(id: string): Promise<User> {

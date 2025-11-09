@@ -57,4 +57,3 @@ export class Dictionary extends BaseEntity {
   @Column({ name: 'is_system', default: false })
   isSystem: boolean; // 是否系统字典（系统字典不可删除）
 }
-

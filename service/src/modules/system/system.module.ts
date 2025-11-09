@@ -9,9 +9,7 @@ import { Category } from '@/modules/categories/entities/category.entity';
 import { Tag } from '@/modules/tags/entities/tag.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Post, User, Comment, Category, Tag]),
-  ],
+  imports: [TypeOrmModule.forFeature([Post, User, Comment, Category, Tag])],
   controllers: [SystemController],
   providers: [SystemService],
 })

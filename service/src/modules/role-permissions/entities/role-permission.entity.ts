@@ -20,4 +20,3 @@ export class RolePermission extends BaseEntity {
   @JoinColumn({ name: 'permission_id' })
   permission: Permission;
 }
-

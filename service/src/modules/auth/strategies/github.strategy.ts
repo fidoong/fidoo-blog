@@ -32,11 +32,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     });
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: GithubProfile,
-  ): Promise<any> {
+  async validate(accessToken: string, refreshToken: string, profile: GithubProfile): Promise<any> {
     const { id, username, displayName, emails, photos } = profile;
     const email = emails?.[0]?.value || `${id}@github.local`;
     const avatar = photos?.[0]?.value || undefined;
@@ -54,4 +50,3 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     return user;
   }
 }
-

@@ -12,4 +12,3 @@ import { UsersModule } from '@/modules/users/users.module';
   exports: [DictionariesService],
 })
 export class DictionariesModule {}
-

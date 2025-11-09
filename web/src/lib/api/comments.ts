@@ -7,9 +7,15 @@ export const commentsApi = {
     postId: string,
     status?: CommentStatus,
   ): Promise<Comment[]> => {
-    return apiClient.get<Comment[]>(`/comments/post/${postId}`, {
-      params: status ? { status } : {},
-    });
+    try {
+      const result = await apiClient.get<Comment[]>(`/comments/post/${postId}`, {
+        params: status ? { status } : {},
+      });
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error fetching post comments:', error);
+      return [];
+    }
   },
 
   // 创建评论

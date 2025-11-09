@@ -20,4 +20,3 @@ export class RoleMenu extends BaseEntity {
   @JoinColumn({ name: 'menu_id' })
   menu: Menu;
 }
-

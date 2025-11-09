@@ -156,10 +156,7 @@ export class AuthService {
 
     // 用户不存在，创建新用户
     // 生成一个随机密码（OAuth 用户不需要密码）
-    const randomPassword = await bcrypt.hash(
-      Math.random().toString(36).slice(-12),
-      10,
-    );
+    const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-12), 10);
 
     const createData: any = {
       username: oauthData.username,

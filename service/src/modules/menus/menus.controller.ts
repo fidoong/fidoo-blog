@@ -1,17 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { MenusService } from './menus.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
+import { QueryMenuDto } from './dto/query-menu.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { Permissions } from '@/common/decorators/permissions.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
@@ -32,9 +24,13 @@ export class MenusController {
 
   @Get()
   @Permissions('menus:view')
-  @ApiOperation({ summary: '获取菜单列表' })
-  findAll() {
-    return this.menusService.findAll();
+  @ApiOperation({ summary: '获取菜单列表（支持增强查询条件，带分页）' })
+  findAll(@Query() queryDto: QueryMenuDto) {
+    // 如果没有分页参数，返回所有菜单（向后兼容）
+    if (!queryDto.page && !queryDto.pageSize && !queryDto.limit) {
+      return this.menusService.findAll();
+    }
+    return this.menusService.findAllEnhanced(queryDto);
   }
 
   @Get('tree')
@@ -65,4 +61,3 @@ export class MenusController {
     return this.menusService.remove(id);
   }
 }
-

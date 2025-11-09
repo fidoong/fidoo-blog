@@ -1,5 +1,9 @@
 import dataSource from '../data-source';
-import { Dictionary, DictionaryType, DictionaryStatus } from '@/modules/dictionaries/entities/dictionary.entity';
+import {
+  Dictionary,
+  DictionaryType,
+  DictionaryStatus,
+} from '@/modules/dictionaries/entities/dictionary.entity';
 
 async function initDictionaries() {
   try {
@@ -126,14 +130,74 @@ async function initDictionaries() {
 
       // 3. 为主要省份创建主要城市
       const majorProvinces = [
-        { code: 'BJ', cities: ['东城区', '西城区', '朝阳区', '丰台区', '石景山区', '海淀区', '门头沟区', '房山区'] },
-        { code: 'SH', cities: ['黄浦区', '徐汇区', '长宁区', '静安区', '普陀区', '虹口区', '杨浦区', '浦东新区'] },
-        { code: 'GD', cities: ['广州市', '深圳市', '珠海市', '汕头市', '佛山市', '韶关市', '湛江市', '肇庆市'] },
-        { code: 'JS', cities: ['南京市', '无锡市', '徐州市', '常州市', '苏州市', '南通市', '连云港市', '淮安市'] },
-        { code: 'ZJ', cities: ['杭州市', '宁波市', '温州市', '嘉兴市', '湖州市', '绍兴市', '金华市', '衢州市'] },
-        { code: 'SD', cities: ['济南市', '青岛市', '淄博市', '枣庄市', '东营市', '烟台市', '潍坊市', '济宁市'] },
-        { code: 'SC', cities: ['成都市', '自贡市', '攀枝花市', '泸州市', '德阳市', '绵阳市', '广元市', '遂宁市'] },
-        { code: 'HB', cities: ['武汉市', '黄石市', '十堰市', '宜昌市', '襄阳市', '鄂州市', '荆门市', '孝感市'] },
+        {
+          code: 'BJ',
+          cities: [
+            '东城区',
+            '西城区',
+            '朝阳区',
+            '丰台区',
+            '石景山区',
+            '海淀区',
+            '门头沟区',
+            '房山区',
+          ],
+        },
+        {
+          code: 'SH',
+          cities: [
+            '黄浦区',
+            '徐汇区',
+            '长宁区',
+            '静安区',
+            '普陀区',
+            '虹口区',
+            '杨浦区',
+            '浦东新区',
+          ],
+        },
+        {
+          code: 'GD',
+          cities: ['广州市', '深圳市', '珠海市', '汕头市', '佛山市', '韶关市', '湛江市', '肇庆市'],
+        },
+        {
+          code: 'JS',
+          cities: [
+            '南京市',
+            '无锡市',
+            '徐州市',
+            '常州市',
+            '苏州市',
+            '南通市',
+            '连云港市',
+            '淮安市',
+          ],
+        },
+        {
+          code: 'ZJ',
+          cities: ['杭州市', '宁波市', '温州市', '嘉兴市', '湖州市', '绍兴市', '金华市', '衢州市'],
+        },
+        {
+          code: 'SD',
+          cities: ['济南市', '青岛市', '淄博市', '枣庄市', '东营市', '烟台市', '潍坊市', '济宁市'],
+        },
+        {
+          code: 'SC',
+          cities: [
+            '成都市',
+            '自贡市',
+            '攀枝花市',
+            '泸州市',
+            '德阳市',
+            '绵阳市',
+            '广元市',
+            '遂宁市',
+          ],
+        },
+        {
+          code: 'HB',
+          cities: ['武汉市', '黄石市', '十堰市', '宜昌市', '襄阳市', '鄂州市', '荆门市', '孝感市'],
+        },
       ];
 
       for (const provinceInfo of majorProvinces) {
@@ -258,4 +322,3 @@ if (require.main === module) {
 }
 
 export default initDictionaries;
-

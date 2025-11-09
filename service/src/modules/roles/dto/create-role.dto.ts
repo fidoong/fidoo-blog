@@ -39,4 +39,3 @@ export class CreateRoleDto {
   @IsString({ each: true })
   menuIds?: string[];
 }
-
