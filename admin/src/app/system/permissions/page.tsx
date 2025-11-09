@@ -36,17 +36,7 @@ function PermissionsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['permissions'],
     queryFn: async () => {
-      const response = await permissionsApi.getPermissions();
-      // 确保返回的是数组
-      let permissions = response.data;
-
-      // 如果 response.data 不是数组，可能是嵌套结构，尝试访问 response.data.data
-      if (!Array.isArray(permissions) && permissions && typeof permissions === 'object' && 'data' in permissions) {
-        permissions = (permissions as { data: Permission[] }).data;
-      }
-
-      // 确保返回数组
-      return Array.isArray(permissions) ? permissions : [];
+      return await permissionsApi.getPermissions();
     },
   });
 

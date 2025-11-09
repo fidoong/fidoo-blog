@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ApiResponse, Category, CreateCategoryDto } from './types';
+import type { Category, CreateCategoryDto } from './types';
 
 export interface UpdateCategoryDto {
   name?: string;
@@ -12,29 +12,24 @@ export interface UpdateCategoryDto {
 }
 
 export const categoriesApi = {
-  getCategories: async (): Promise<ApiResponse<Category[]>> => {
-    const response = await apiClient.get('/categories');
-    return response.data;
+  getCategories: async (): Promise<Category[]> => {
+    return apiClient.get<Category[]>('/categories');
   },
 
-  getCategory: async (id: string): Promise<ApiResponse<Category>> => {
-    const response = await apiClient.get(`/categories/${id}`);
-    return response.data;
+  getCategory: async (id: string): Promise<Category> => {
+    return apiClient.get<Category>(`/categories/${id}`);
   },
 
-  createCategory: async (data: CreateCategoryDto): Promise<ApiResponse<Category>> => {
-    const response = await apiClient.post('/categories', data);
-    return response.data;
+  createCategory: async (data: CreateCategoryDto): Promise<Category> => {
+    return apiClient.post<Category>('/categories', data);
   },
 
-  updateCategory: async (id: string, data: UpdateCategoryDto): Promise<ApiResponse<Category>> => {
-    const response = await apiClient.post(`/categories/${id}/update`, data);
-    return response.data;
+  updateCategory: async (id: string, data: UpdateCategoryDto): Promise<Category> => {
+    return apiClient.post<Category>(`/categories/${id}/update`, data);
   },
 
-  deleteCategory: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post(`/categories/${id}/delete`);
-    return response.data;
+  deleteCategory: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/categories/${id}/delete`);
   },
 };
 

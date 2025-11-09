@@ -15,7 +15,7 @@ function CategoriesPage() {
     queryFn: () => categoriesApi.getCategories(),
   });
 
-  const categories = data?.data || [];
+  const categories = data || [];
 
   return (
     <ProtectedRoute requiredPermissions={['categories:view']}>

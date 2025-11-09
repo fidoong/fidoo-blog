@@ -1,5 +1,4 @@
 import { apiClient } from './client';
-import type { ApiResponse } from './types';
 
 export interface UserProfile {
   id: string;
@@ -25,16 +24,14 @@ export interface UpdateUserProfileDto {
 
 export const userProfilesApi = {
   // 获取用户资料
-  getProfile: async (userId?: string): Promise<ApiResponse<UserProfile>> => {
-    const response = await apiClient.get('/user-profiles', {
+  getProfile: async (userId?: string): Promise<UserProfile> => {
+    return apiClient.get<UserProfile>('/user-profiles', {
       params: userId ? { userId } : {},
     });
-    return response.data;
   },
 
   // 更新用户资料
-  updateProfile: async (data: UpdateUserProfileDto): Promise<ApiResponse<UserProfile>> => {
-    const response = await apiClient.post('/user-profiles/update', data);
-    return response.data;
+  updateProfile: async (data: UpdateUserProfileDto): Promise<UserProfile> => {
+    return apiClient.post<UserProfile>('/user-profiles/update', data);
   },
 };

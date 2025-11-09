@@ -49,7 +49,7 @@ export default function UserPage({
   });
 
   // 从文章列表中查找匹配的用户
-  const user = postsData?.data?.items?.find((post) => post.author.username === username)?.author;
+  const user = postsData?.items?.find((post) => post.author.username === username)?.author;
 
   // 当找到用户时，设置userId
   useEffect(() => {
@@ -67,8 +67,8 @@ export default function UserPage({
 
   // 初始化关注状态
   useEffect(() => {
-    if (followCheckData?.data) {
-      setIsFollowing(followCheckData.data.isFollowing);
+    if (followCheckData) {
+      setIsFollowing(followCheckData.isFollowing);
     }
   }, [followCheckData]);
 
@@ -76,7 +76,7 @@ export default function UserPage({
   const followMutation = useMutation({
     mutationFn: () => (isFollowing ? followsApi.unfollow(userId!) : followsApi.follow(userId!)),
     onSuccess: (response) => {
-      const newIsFollowing = response.data?.isFollowing ?? !isFollowing;
+      const newIsFollowing = response.isFollowing ?? !isFollowing;
       setIsFollowing(newIsFollowing);
       queryClient.invalidateQueries({ queryKey: ['user-posts', username] });
     },

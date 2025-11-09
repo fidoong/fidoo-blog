@@ -234,7 +234,5 @@ export interface DashboardStats {
   pendingComments: number;
   totalCategories: number;
   totalTags: number;
-  recentPosts: Post[];
-  recentUsers: User[];
 }
 

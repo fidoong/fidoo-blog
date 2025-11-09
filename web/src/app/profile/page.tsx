@@ -28,8 +28,8 @@ export default function ProfilePage() {
   }, [isAuthenticated, _hasHydrated]);
 
   useEffect(() => {
-    if (profileData?.data) {
-      setUser(profileData.data);
+    if (profileData) {
+      setUser(profileData);
     }
   }, [profileData, setUser]);
 
@@ -47,7 +47,7 @@ export default function ProfilePage() {
     );
   }
 
-  const displayUser = profileData?.data || user;
+  const displayUser = profileData || user;
 
   return (
     <MainLayout>

@@ -42,8 +42,8 @@ export default function CategoriesPage() {
 
   // 获取选中的分类信息
   const selectedCategory = useMemo(() => {
-    if (!selectedCategorySlug || !allCategoriesData?.data) return null;
-    return allCategoriesData.data.find((cat) => cat.slug === selectedCategorySlug);
+    if (!selectedCategorySlug || !allCategoriesData) return null;
+    return allCategoriesData.find((cat) => cat.slug === selectedCategorySlug);
   }, [selectedCategorySlug, allCategoriesData]);
 
   // 获取同级分类（用于相关分类推荐）
@@ -95,8 +95,8 @@ export default function CategoriesPage() {
     }
   }, [selectedCategory?.id, selectedCategory?.level, sortOption]);
 
-  const tags = tagsData?.data || [];
-  const mainCategories = mainCategoriesData?.data || [];
+  const tags = tagsData || [];
+  const mainCategories = mainCategoriesData || [];
 
   const handleCategoryClick = (categorySlug: string) => {
     if (selectedCategorySlug === categorySlug) {
@@ -146,9 +146,9 @@ export default function CategoriesPage() {
                   )}
 
                   {/* 精选文章预览 */}
-                  {featuredPostsData?.data?.items && featuredPostsData.data.items.length > 0 && (
+                  {featuredPostsData?.items && featuredPostsData.items.length > 0 && (
                     <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {featuredPostsData.data.items.slice(0, 3).map((post) => (
+                      {featuredPostsData.items.slice(0, 3).map((post) => (
                         <Link
                           key={post.id}
                           href={`/posts/${post.slug}`}
@@ -200,9 +200,9 @@ export default function CategoriesPage() {
             {selectedCategory && <CategorySidebar category={selectedCategory} />}
 
             {/* 相关分类推荐 */}
-            {siblingCategoriesData?.data && siblingCategoriesData.data.length > 0 && (
+            {siblingCategoriesData && siblingCategoriesData.length > 0 && (
               <RelatedCategories
-                categories={siblingCategoriesData.data}
+                categories={siblingCategoriesData}
                 currentCategoryId={selectedCategory?.id}
               />
             )}

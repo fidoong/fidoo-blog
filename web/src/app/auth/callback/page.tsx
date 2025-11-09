@@ -78,22 +78,14 @@ export default function AuthCallbackPage() {
     if (code && provider) {
       const handleCallback = async () => {
         try {
-          const response = await authApi.handleOAuthCallback(provider, code);
-          if (response.code === 0 && response.data) {
-            const { user, accessToken, refreshToken } = response.data;
-            setAuth(user, accessToken, refreshToken);
-            setStatus('success');
-            setMessage('登录成功，正在跳转...');
-            setTimeout(() => {
-              router.push('/');
-            }, 1500);
-          } else {
-            setStatus('error');
-            setMessage(response.message || '登录失败');
-            setTimeout(() => {
-              router.push('/');
-            }, 3000);
-          }
+          const loginResponse = await authApi.handleOAuthCallback(provider, code);
+          const { user, accessToken, refreshToken } = loginResponse;
+          setAuth(user, accessToken, refreshToken);
+          setStatus('success');
+          setMessage('登录成功，正在跳转...');
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
         } catch (err: unknown) {
           const error = err as { response?: { data?: { message?: string } }; message?: string };
           setStatus('error');

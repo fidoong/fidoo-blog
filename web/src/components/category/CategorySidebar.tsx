@@ -53,9 +53,9 @@ export function CategorySidebar({ category, className }: CategorySidebarProps) {
     enabled: !!category.id,
   });
 
-  const hotPosts = hotPostsData?.data?.items || [];
-  const latestPosts = latestPostsData?.data?.items || [];
-  const tags = tagsData?.data || [];
+  const hotPosts = hotPostsData?.items || [];
+  const latestPosts = latestPostsData?.items || [];
+  const tags = tagsData || [];
 
   return (
     <aside className={className}>

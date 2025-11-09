@@ -1,11 +1,10 @@
 import { apiClient } from './client';
-import type { ApiResponse, User, PaginatedResponse } from './types';
+import type { User, PaginatedResponse } from './types';
 
 export const usersApi = {
   // 获取用户详情
-  getUser: async (id: string): Promise<ApiResponse<User>> => {
-    const response = await apiClient.get(`/users/${id}`);
-    return response.data;
+  getUser: async (id: string): Promise<User> => {
+    return apiClient.get<User>(`/users/${id}`);
   },
 
   // 获取用户列表（管理员）
@@ -13,10 +12,9 @@ export const usersApi = {
     page?: number,
     pageSize?: number,
     keyword?: string,
-  ): Promise<ApiResponse<PaginatedResponse<User>>> => {
-    const response = await apiClient.get('/users', {
+  ): Promise<PaginatedResponse<User>> => {
+    return apiClient.get<PaginatedResponse<User>>('/users', {
       params: { page, pageSize, keyword },
     });
-    return response.data;
   },
 };

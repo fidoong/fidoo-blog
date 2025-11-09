@@ -1,5 +1,6 @@
 import { apiClient } from './client';
-import type { ApiResponse, User, LoginResponse } from './types';
+import type { User, LoginResponse } from './types';
+import type { Menu } from './menus';
 
 export interface LoginDto {
   username: string;
@@ -7,29 +8,24 @@ export interface LoginDto {
 }
 
 export const authApi = {
-  login: async (data: LoginDto): Promise<ApiResponse<LoginResponse>> => {
-    const response = await apiClient.post('/auth/login', data);
-    return response.data;
+  login: async (data: LoginDto): Promise<LoginResponse> => {
+    return apiClient.post<LoginResponse>('/auth/login', data);
   },
 
-  getProfile: async (): Promise<ApiResponse<User>> => {
-    const response = await apiClient.get('/auth/profile');
-    return response.data;
+  getProfile: async (): Promise<User> => {
+    return apiClient.get<User>('/auth/profile');
   },
 
-  getPermissions: async (): Promise<ApiResponse<string[]>> => {
-    const response = await apiClient.get('/auth/permissions');
-    return response.data;
+  getPermissions: async (): Promise<string[]> => {
+    return apiClient.get<string[]>('/auth/permissions');
   },
 
-  getMenus: async (): Promise<ApiResponse<any[]>> => {
-    const response = await apiClient.get('/auth/menus');
-    return response.data;
+  getMenus: async (): Promise<Menu[]> => {
+    return apiClient.get<Menu[]>('/auth/menus');
   },
 
-  logout: async (): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post('/auth/logout');
-    return response.data;
+  logout: async (): Promise<void> => {
+    return apiClient.post<void>('/auth/logout');
   },
 };
 

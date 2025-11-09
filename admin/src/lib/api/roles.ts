@@ -1,5 +1,4 @@
 import { apiClient } from './client';
-import type { ApiResponse } from './types';
 
 export interface Role {
   id: string;
@@ -24,23 +23,23 @@ export interface CreateRoleDto {
 }
 
 export const rolesApi = {
-  getRoles: (): Promise<ApiResponse<Role[]>> => {
-    return apiClient.get('/roles');
+  getRoles: (): Promise<Role[]> => {
+    return apiClient.get<Role[]>('/roles');
   },
 
-  getRole: (id: string): Promise<ApiResponse<Role>> => {
-    return apiClient.get(`/roles/${id}`);
+  getRole: (id: string): Promise<Role> => {
+    return apiClient.get<Role>(`/roles/${id}`);
   },
 
-  createRole: (data: CreateRoleDto): Promise<ApiResponse<Role>> => {
-    return apiClient.post('/roles', data);
+  createRole: (data: CreateRoleDto): Promise<Role> => {
+    return apiClient.post<Role>('/roles', data);
   },
 
-  updateRole: (id: string, data: Partial<CreateRoleDto>): Promise<ApiResponse<Role>> => {
-    return apiClient.put(`/roles/${id}`, data);
+  updateRole: (id: string, data: Partial<CreateRoleDto>): Promise<Role> => {
+    return apiClient.put<Role>(`/roles/${id}`, data);
   },
 
-  deleteRole: (id: string): Promise<ApiResponse<void>> => {
-    return apiClient.delete(`/roles/${id}`);
+  deleteRole: (id: string): Promise<void> => {
+    return apiClient.delete<void>(`/roles/${id}`);
   },
 };

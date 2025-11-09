@@ -8,29 +8,13 @@ import { systemApi } from '@/lib/api/system';
 import { FileText, Users, MessageSquare, FolderTree } from 'lucide-react';
 
 function DashboardPage() {
-  const { data: statsData, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      // 这里可以聚合多个 API 调用
-      // 暂时返回模拟数据
-      return {
-        code: 0,
-        data: {
-          totalPosts: 120,
-          publishedPosts: 95,
-          draftPosts: 25,
-          totalUsers: 50,
-          activeUsers: 45,
-          totalComments: 320,
-          pendingComments: 12,
-          totalCategories: 8,
-          totalTags: 45,
-        },
-      };
+      // 使用真实的 API 调用
+      return systemApi.getDashboardStats();
     },
   });
-
-  const stats = statsData?.data;
 
   const statCards = [
     {

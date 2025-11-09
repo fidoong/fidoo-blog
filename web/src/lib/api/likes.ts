@@ -1,5 +1,4 @@
 import { apiClient } from './client';
-import type { ApiResponse } from './types';
 
 export type LikeType = 'post' | 'comment';
 
@@ -14,32 +13,29 @@ export interface LikeResponse {
 
 export const likesApi = {
   // 点赞
-  like: async (targetType: LikeType, targetId: string): Promise<ApiResponse<LikeResponse>> => {
-    const response = await apiClient.post('/likes', {
+  like: async (targetType: LikeType, targetId: string): Promise<LikeResponse> => {
+    return apiClient.post<LikeResponse>('/likes', {
       targetType,
       targetId,
     });
-    return response.data;
   },
 
   // 取消点赞
-  unlike: async (targetType: LikeType, targetId: string): Promise<ApiResponse<LikeResponse>> => {
-    const response = await apiClient.post('/likes/unlike', {
+  unlike: async (targetType: LikeType, targetId: string): Promise<LikeResponse> => {
+    return apiClient.post<LikeResponse>('/likes/unlike', {
       targetType,
       targetId,
     });
-    return response.data;
   },
 
   // 检查是否已点赞
   checkLike: async (
     targetType: LikeType,
     targetId: string,
-  ): Promise<ApiResponse<LikeCheckResponse>> => {
-    const response = await apiClient.get('/likes/check', {
+  ): Promise<LikeCheckResponse> => {
+    return apiClient.get<LikeCheckResponse>('/likes/check', {
       params: { targetType, targetId },
     });
-    return response.data;
   },
 
   // 获取我的点赞列表
@@ -47,10 +43,9 @@ export const likesApi = {
     targetType: LikeType,
     page?: number,
     pageSize?: number,
-  ): Promise<ApiResponse<any>> => {
-    const response = await apiClient.get('/likes/my', {
+  ): Promise<any> => {
+    return apiClient.get<any>('/likes/my', {
       params: { targetType, page, pageSize },
     });
-    return response.data;
   },
 };

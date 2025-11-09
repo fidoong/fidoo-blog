@@ -59,17 +59,7 @@ function MenusPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['menus'],
     queryFn: async () => {
-      const response = await menusApi.getMenuTree();
-      // 确保返回的是数组
-      let menus = response.data;
-
-      // 如果 response.data 不是数组，可能是嵌套结构，尝试访问 response.data.data
-      if (!Array.isArray(menus) && menus && typeof menus === 'object' && 'data' in menus) {
-        menus = (menus as { data: Menu[] }).data;
-      }
-
-      // 确保返回数组
-      return Array.isArray(menus) ? menus : [];
+      return await menusApi.getMenuTree();
     },
   });
 

@@ -27,12 +27,12 @@ export function Sidebar() {
   });
 
   const categoryTree = useMemo(() => {
-    return categoryTreeData?.data || [];
+    return categoryTreeData || [];
   }, [categoryTreeData]);
 
   // 按分类分组标签
   const tagsByCategory = useMemo(() => {
-    const tags = tagsData?.data || [];
+    const tags = tagsData || [];
     const grouped: Record<string, typeof tags> = {};
     tags.forEach((tag) => {
       const categoryId = tag.categoryId || 'uncategorized';
@@ -59,7 +59,7 @@ export function Sidebar() {
     enabled: !!currentTagSlug,
   });
 
-  const currentTag = currentTagData?.data;
+  const currentTag = currentTagData;
 
   // 如果当前在标签页面，根据标签的 categoryId 找到对应的分类，保持分类的选中状态
   const activeCategorySlug = useMemo(() => {
@@ -152,7 +152,7 @@ export function Sidebar() {
     if (!currentMainCategory) return [];
 
     const subCategoryIds = currentMainCategory.children?.map((child) => child.id) || [];
-    const allTags = tagsData?.data || [];
+    const allTags = tagsData || [];
 
     // 收集所有子分类的标签
     return allTags.filter((tag) => {
@@ -322,7 +322,7 @@ export function Sidebar() {
         <div className="flex flex-wrap gap-2 max-h-[calc(50vh-12rem)] overflow-y-auto custom-scrollbar -mr-1 pr-2">
           {(() => {
             // 如果在大类页面，优先显示该大类的标签，否则显示所有热门标签
-            const allTags = tagsData?.data || [];
+            const allTags = tagsData || [];
             const displayTags =
               currentMainCategory && currentMainCategoryTags.length > 0
                 ? currentMainCategoryTags

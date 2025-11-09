@@ -22,9 +22,8 @@ export function PostCompactList({ params }: PostCompactListProps) {
       queryFn: ({ pageParam = 1 }) =>
         postsApi.getPosts({ ...params, page: pageParam, pageSize: 20 }),
       getNextPageParam: (lastPage) => {
-        const pagination = lastPage?.data;
-        if (pagination && pagination.hasNext) {
-          return pagination.page + 1;
+        if (lastPage && lastPage.hasNext) {
+          return lastPage.page + 1;
         }
         return undefined;
       },
@@ -33,7 +32,7 @@ export function PostCompactList({ params }: PostCompactListProps) {
 
   // 合并所有页面的文章
   const allPosts = useMemo(() => {
-    return data?.pages.flatMap((page) => page?.data?.items || []) || [];
+    return data?.pages.flatMap((page) => page?.items || []) || [];
   }, [data]);
 
   // 分离置顶、精选和普通文章

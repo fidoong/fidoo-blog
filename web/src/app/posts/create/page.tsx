@@ -71,8 +71,8 @@ export default function CreatePostPage() {
     enabled: isAuthenticated,
   });
 
-  const categories = categoriesData?.data || [];
-  const tags = tagsData?.data || [];
+  const categories = categoriesData || [];
+  const tags = tagsData || [];
 
   // 表单
   const {
@@ -119,14 +119,10 @@ export default function CreatePostPage() {
   // 创建文章 mutation
   const createPostMutation = useMutation({
     mutationFn: (data: CreatePostDto) => postsApi.createPost(data),
-    onSuccess: (response) => {
-      if (response.code === 0 && response.data) {
-        toast.success('文章创建成功');
-        queryClient.invalidateQueries({ queryKey: ['posts'] });
-        router.push(`/posts/${response.data.slug}`);
-      } else {
-        toast.error(response.message || '创建失败');
-      }
+    onSuccess: (post) => {
+      toast.success('文章创建成功');
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      router.push(`/posts/${post.slug}`);
     },
     onError: (error: unknown) => {
       const err = error as {

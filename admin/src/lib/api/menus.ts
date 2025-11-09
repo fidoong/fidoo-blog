@@ -1,5 +1,4 @@
 import { apiClient } from './client';
-import type { ApiResponse } from './types';
 
 export interface Menu {
   id: string;
@@ -42,27 +41,27 @@ export interface CreateMenuDto {
 }
 
 export const menusApi = {
-  getMenus: (): Promise<ApiResponse<Menu[]>> => {
-    return apiClient.get('/menus');
+  getMenus: (): Promise<Menu[]> => {
+    return apiClient.get<Menu[]>('/menus');
   },
 
-  getMenuTree: (): Promise<ApiResponse<Menu[]>> => {
-    return apiClient.get('/menus/tree');
+  getMenuTree: (): Promise<Menu[]> => {
+    return apiClient.get<Menu[]>('/menus/tree');
   },
 
-  getMenu: (id: string): Promise<ApiResponse<Menu>> => {
-    return apiClient.get(`/menus/${id}`);
+  getMenu: (id: string): Promise<Menu> => {
+    return apiClient.get<Menu>(`/menus/${id}`);
   },
 
-  createMenu: (data: CreateMenuDto): Promise<ApiResponse<Menu>> => {
-    return apiClient.post('/menus', data);
+  createMenu: (data: CreateMenuDto): Promise<Menu> => {
+    return apiClient.post<Menu>('/menus', data);
   },
 
-  updateMenu: (id: string, data: Partial<CreateMenuDto>): Promise<ApiResponse<Menu>> => {
-    return apiClient.put(`/menus/${id}`, data);
+  updateMenu: (id: string, data: Partial<CreateMenuDto>): Promise<Menu> => {
+    return apiClient.put<Menu>(`/menus/${id}`, data);
   },
 
-  deleteMenu: (id: string): Promise<ApiResponse<void>> => {
-    return apiClient.delete(`/menus/${id}`);
+  deleteMenu: (id: string): Promise<void> => {
+    return apiClient.delete<void>(`/menus/${id}`);
   },
 };

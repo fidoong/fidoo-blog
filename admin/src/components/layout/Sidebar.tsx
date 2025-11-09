@@ -253,8 +253,15 @@ export function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
               <div className="text-center py-4 text-sm text-muted-foreground">
                 暂无菜单
                 {process.env.NODE_ENV === 'development' && (
-                  <div className="mt-2 text-xs">
-                    原始数据长度: {menus.length}, 树形数据长度: {menuTree.length}
+                  <div className="mt-2 text-xs space-y-1">
+                    <div>原始数据长度: {menus.length}</div>
+                    <div>树形数据长度: {menuTree.length}</div>
+                    <div>菜单数据类型: {Array.isArray(menus) ? '数组' : typeof menus}</div>
+                    {menus.length > 0 && (
+                      <div className="mt-2 text-xs text-left">
+                        原始数据: {JSON.stringify(menus.slice(0, 2), null, 2)}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

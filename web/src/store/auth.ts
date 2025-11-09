@@ -72,11 +72,9 @@ export const useAuthStore = create<AuthState>()(
           setTimeout(async () => {
             try {
               const { authApi } = await import('@/lib/api/auth');
-              const response = await authApi.getProfile();
-              if (response.code === 0 && response.data) {
-                state.setUser(response.data);
-                state.setAuth(response.data, state.accessToken!, state.refreshToken || '');
-              }
+              const user = await authApi.getProfile();
+              state.setUser(user);
+              state.setAuth(user, state.accessToken!, state.refreshToken || '');
             } catch (error) {
               // 获取用户信息失败，清除 token
               state.clearAuth();

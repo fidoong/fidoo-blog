@@ -45,7 +45,8 @@ export class LikesController {
     @Query('targetType') targetType: LikeType,
     @Query('targetId') targetId: string,
   ) {
-    return { isLiked: await this.likesService.isLiked(userId, targetType, targetId) };
+    const isLiked = await this.likesService.isLiked(userId, targetType, targetId);
+    return { isLiked };
   }
 
   @Get('my')

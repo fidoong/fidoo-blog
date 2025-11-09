@@ -70,24 +70,14 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '获取当前用户权限列表' })
   async getPermissions(@CurrentUser() user: User) {
-    const permissions = await this.usersService.getUserPermissions(user.id);
-    return {
-      code: 0,
-      data: permissions,
-      message: '获取成功',
-    };
+    return await this.usersService.getUserPermissions(user.id);
   }
 
   @Get('menus')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '获取当前用户菜单列表' })
   async getMenus(@CurrentUser() user: User) {
-    const menus = await this.usersService.getUserMenus(user.id);
-    return {
-      code: 0,
-      data: menus,
-      message: '获取成功',
-    };
+    return await this.usersService.getUserMenus(user.id);
   }
 
   @Post('logout')

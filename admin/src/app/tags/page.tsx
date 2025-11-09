@@ -15,7 +15,7 @@ function TagsPage() {
     queryFn: () => tagsApi.getTags(),
   });
 
-  const tags = data?.data || [];
+  const tags = data || [];
 
   return (
     <ProtectedRoute requiredPermissions={['tags:view']}>

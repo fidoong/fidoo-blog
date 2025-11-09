@@ -23,4 +23,11 @@ export class SystemController {
   getProcessInfo() {
     return this.systemService.getProcessInfo();
   }
+
+  @Get('dashboard')
+  @Roles(UserRoleEnum.ADMIN)
+  @ApiOperation({ summary: '获取仪表盘统计数据（仅管理员）' })
+  getDashboardStats() {
+    return this.systemService.getDashboardStats();
+  }
 }

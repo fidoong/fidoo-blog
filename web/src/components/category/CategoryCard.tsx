@@ -32,7 +32,7 @@ export function CategoryCard({ category, index }: CategoryCardProps) {
     enabled: !!category.id,
   });
 
-  const latestPosts = latestPostsData?.data?.items || [];
+  const latestPosts = latestPostsData?.items || [];
 
   return (
     <motion.div

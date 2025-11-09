@@ -36,17 +36,7 @@ function RolesPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['roles'],
     queryFn: async () => {
-      const response = await rolesApi.getRoles();
-      // 确保返回的是数组
-      let roles = response.data;
-
-      // 如果 response.data 不是数组，可能是嵌套结构，尝试访问 response.data.data
-      if (!Array.isArray(roles) && roles && typeof roles === 'object' && 'data' in roles) {
-        roles = (roles as { data: Role[] }).data;
-      }
-
-      // 确保返回数组
-      return Array.isArray(roles) ? roles : [];
+      return await rolesApi.getRoles();
     },
   });
 

@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ApiResponse, User, PaginatedResponse } from './types';
+import type { User, PaginatedResponse } from './types';
 
 export interface FollowCheckResponse {
   isFollowing: boolean;
@@ -9,23 +9,20 @@ export const followsApi = {
   // 关注用户
   follow: async (
     userId: string,
-  ): Promise<ApiResponse<{ message: string; isFollowing: boolean }>> => {
-    const response = await apiClient.post(`/follows/${userId}`);
-    return response.data;
+  ): Promise<{ message: string; isFollowing: boolean }> => {
+    return apiClient.post<{ message: string; isFollowing: boolean }>(`/follows/${userId}`);
   },
 
   // 取消关注
   unfollow: async (
     userId: string,
-  ): Promise<ApiResponse<{ message: string; isFollowing: boolean }>> => {
-    const response = await apiClient.post(`/follows/${userId}/unfollow`);
-    return response.data;
+  ): Promise<{ message: string; isFollowing: boolean }> => {
+    return apiClient.post<{ message: string; isFollowing: boolean }>(`/follows/${userId}/unfollow`);
   },
 
   // 检查是否已关注
-  checkFollowing: async (userId: string): Promise<ApiResponse<FollowCheckResponse>> => {
-    const response = await apiClient.get(`/follows/check/${userId}`);
-    return response.data;
+  checkFollowing: async (userId: string): Promise<FollowCheckResponse> => {
+    return apiClient.get<FollowCheckResponse>(`/follows/check/${userId}`);
   },
 
   // 获取关注列表
@@ -33,11 +30,10 @@ export const followsApi = {
     userId: string,
     page?: number,
     pageSize?: number,
-  ): Promise<ApiResponse<PaginatedResponse<User>>> => {
-    const response = await apiClient.get(`/follows/following/${userId}`, {
+  ): Promise<PaginatedResponse<User>> => {
+    return apiClient.get<PaginatedResponse<User>>(`/follows/following/${userId}`, {
       params: { page, pageSize },
     });
-    return response.data;
   },
 
   // 获取粉丝列表
@@ -45,10 +41,9 @@ export const followsApi = {
     userId: string,
     page?: number,
     pageSize?: number,
-  ): Promise<ApiResponse<PaginatedResponse<User>>> => {
-    const response = await apiClient.get(`/follows/followers/${userId}`, {
+  ): Promise<PaginatedResponse<User>> => {
+    return apiClient.get<PaginatedResponse<User>>(`/follows/followers/${userId}`, {
       params: { page, pageSize },
     });
-    return response.data;
   },
 };

@@ -29,13 +29,13 @@ export default function TagsPage() {
 
   // 获取选中的标签信息
   const selectedTag = useMemo(() => {
-    if (!selectedTagName || !tagsData?.data) return null;
-    return tagsData.data.find(
+    if (!selectedTagName || !tagsData) return null;
+    return tagsData.find(
       (tag) => tag.name === selectedTagName || tag.slug === selectedTagName,
     );
   }, [selectedTagName, tagsData]);
 
-  const tags = tagsData?.data || [];
+  const tags = tagsData || [];
   // 按字母顺序排序标签
   const sortedTags = [...tags].sort((a, b) => a.name.localeCompare(b.name));
 

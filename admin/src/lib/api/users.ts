@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ApiResponse, User, PaginatedResponse, UserQueryParams } from './types';
+import type { User, PaginatedResponse, UserQueryParams } from './types';
 
 export interface CreateUserDto {
   username: string;
@@ -19,29 +19,24 @@ export interface UpdateUserDto {
 }
 
 export const usersApi = {
-  getUsers: async (params?: UserQueryParams): Promise<ApiResponse<PaginatedResponse<User>>> => {
-    const response = await apiClient.get('/users', { params });
-    return response.data;
+  getUsers: async (params?: UserQueryParams): Promise<PaginatedResponse<User>> => {
+    return apiClient.get<PaginatedResponse<User>>('/users', { params });
   },
 
-  getUser: async (id: string): Promise<ApiResponse<User>> => {
-    const response = await apiClient.get(`/users/${id}`);
-    return response.data;
+  getUser: async (id: string): Promise<User> => {
+    return apiClient.get<User>(`/users/${id}`);
   },
 
-  createUser: async (data: CreateUserDto): Promise<ApiResponse<User>> => {
-    const response = await apiClient.post('/users', data);
-    return response.data;
+  createUser: async (data: CreateUserDto): Promise<User> => {
+    return apiClient.post<User>('/users', data);
   },
 
-  updateUser: async (id: string, data: UpdateUserDto): Promise<ApiResponse<User>> => {
-    const response = await apiClient.post(`/users/${id}/update`, data);
-    return response.data;
+  updateUser: async (id: string, data: UpdateUserDto): Promise<User> => {
+    return apiClient.post<User>(`/users/${id}/update`, data);
   },
 
-  deleteUser: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post(`/users/${id}/delete`);
-    return response.data;
+  deleteUser: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/users/${id}/delete`);
   },
 };
 

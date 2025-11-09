@@ -50,7 +50,7 @@ export function PostComments({ postId }: PostCommentsProps) {
     },
   });
 
-  const comments = useMemo(() => data?.data || [], [data?.data]);
+  const comments = useMemo(() => data || [], [data]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

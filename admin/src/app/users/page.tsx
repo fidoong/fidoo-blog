@@ -22,8 +22,8 @@ function UsersPage() {
     queryFn: () => usersApi.getUsers({ page, pageSize, keyword: keyword || undefined }),
   });
 
-  const users = data?.data?.items || [];
-  const total = data?.data?.total || 0;
+  const users = data?.items || [];
+  const total = data?.total || 0;
 
   return (
     <ProtectedRoute requiredPermissions={['users:view']}>

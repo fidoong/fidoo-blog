@@ -1,52 +1,44 @@
 import { apiClient } from './client';
-import type { ApiResponse, Post, PaginatedResponse, PostQueryParams, CreatePostDto } from './types';
+import type { Post, PaginatedResponse, PostQueryParams, CreatePostDto } from './types';
 
 export const postsApi = {
   // 获取文章列表
-  getPosts: async (params?: PostQueryParams): Promise<ApiResponse<PaginatedResponse<Post>>> => {
-    const response = await apiClient.get('/posts', { params });
-    return response.data;
+  getPosts: async (params?: PostQueryParams): Promise<PaginatedResponse<Post>> => {
+    return apiClient.get<PaginatedResponse<Post>>('/posts', { params });
   },
 
   // 获取文章详情
-  getPost: async (id: string): Promise<ApiResponse<Post>> => {
-    const response = await apiClient.get(`/posts/${id}`);
-    return response.data;
+  getPost: async (id: string): Promise<Post> => {
+    return apiClient.get<Post>(`/posts/${id}`);
   },
 
   // 通过 slug 获取文章
-  getPostBySlug: async (slug: string): Promise<ApiResponse<Post>> => {
-    const response = await apiClient.get(`/posts/slug/${slug}`);
-    return response.data;
+  getPostBySlug: async (slug: string): Promise<Post> => {
+    return apiClient.get<Post>(`/posts/slug/${slug}`);
   },
 
   // 创建文章
-  createPost: async (data: CreatePostDto): Promise<ApiResponse<Post>> => {
-    const response = await apiClient.post('/posts', data);
-    return response.data;
+  createPost: async (data: CreatePostDto): Promise<Post> => {
+    return apiClient.post<Post>('/posts', data);
   },
 
   // 更新文章
-  updatePost: async (id: string, data: Partial<CreatePostDto>): Promise<ApiResponse<Post>> => {
-    const response = await apiClient.post(`/posts/${id}/update`, data);
-    return response.data;
+  updatePost: async (id: string, data: Partial<CreatePostDto>): Promise<Post> => {
+    return apiClient.post<Post>(`/posts/${id}/update`, data);
   },
 
   // 删除文章
-  deletePost: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post(`/posts/${id}/delete`);
-    return response.data;
+  deletePost: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/posts/${id}/delete`);
   },
 
   // 增加浏览量
-  incrementViewCount: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post(`/posts/${id}/view`);
-    return response.data;
+  incrementViewCount: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/posts/${id}/view`);
   },
 
   // 点赞文章
-  likePost: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post(`/posts/${id}/like`);
-    return response.data;
+  likePost: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/posts/${id}/like`);
   },
 };

@@ -6,17 +6,7 @@ export function useUserPermissions() {
   return useQuery({
     queryKey: ['user-permissions'],
     queryFn: async () => {
-      const response = await authApi.getPermissions();
-      // 确保返回的是数组
-      let data = response.data;
-
-      // 如果 response.data 不是数组，可能是嵌套结构，尝试访问 response.data.data
-      if (!Array.isArray(data) && data && typeof data === 'object' && 'data' in data) {
-        data = (data as { data: string[] }).data;
-      }
-
-      // 确保返回数组
-      return Array.isArray(data) ? data : [];
+      return await authApi.getPermissions();
     },
     staleTime: 5 * 60 * 1000, // 5分钟缓存
   });
@@ -26,29 +16,35 @@ export function useUserMenus() {
   return useQuery({
     queryKey: ['user-menus'],
     queryFn: async () => {
-      const response = await authApi.getMenus();
-      // response 是 ApiResponse<Menu[]>，所以 response.data 是菜单数组
-      // 但如果 response 本身已经是 { code, data, message }，则需要访问 response.data
-      let data = response.data;
+      try {
+        const menus = await authApi.getMenus();
 
-      // 如果 response.data 不是数组，可能是嵌套结构，尝试访问 response.data.data
-      if (!Array.isArray(data) && data && typeof data === 'object' && 'data' in data) {
-        data = (data as { data: Menu[] }).data;
+        // 调试：打印菜单数据
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[useUserMenus] 菜单数据:', {
+            total: Array.isArray(menus) ? menus.length : 0,
+            type: typeof menus,
+            isArray: Array.isArray(menus),
+            menus: Array.isArray(menus)
+              ? menus.map((m) => ({ id: m.id, name: m.name, title: m.title, path: m.path, parentId: m.parentId }))
+              : [],
+          });
+        }
+
+        // 确保返回数组
+        if (!Array.isArray(menus)) {
+          console.error('[useUserMenus] 菜单数据不是数组:', menus);
+          return [];
+        }
+
+        return menus;
+      } catch (error) {
+        console.error('[useUserMenus] 获取菜单失败:', error);
+        return [];
       }
-
-      // 调试：打印菜单数据
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[useUserMenus] 菜单数据:', {
-          total: Array.isArray(data) ? data.length : 0,
-          menus: Array.isArray(data)
-            ? data.map((m) => ({ name: m.name, title: m.title, path: m.path }))
-            : [],
-        });
-      }
-
-      return Array.isArray(data) ? data : [];
     },
     staleTime: 5 * 60 * 1000, // 5分钟缓存
+    retry: 1, // 失败时重试1次
   });
 }
 

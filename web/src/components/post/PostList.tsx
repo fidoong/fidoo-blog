@@ -22,9 +22,8 @@ export function PostList({ params }: PostListProps) {
       queryFn: ({ pageParam = 1 }) =>
         postsApi.getPosts({ ...params, page: pageParam, pageSize: 12 }),
       getNextPageParam: (lastPage) => {
-        const pagination = lastPage?.data;
-        if (pagination && pagination.hasNext) {
-          const nextPage = pagination.page + 1;
+        if (lastPage && lastPage.hasNext) {
+          const nextPage = lastPage.page + 1;
           return nextPage;
         }
         return undefined;
@@ -34,7 +33,7 @@ export function PostList({ params }: PostListProps) {
   // 合并所有页面的文章
   useEffect(() => {
     if (data?.pages) {
-      const posts = data.pages.flatMap((page) => page?.data?.items || []);
+      const posts = data.pages.flatMap((page) => page?.items || []);
       setAllPosts(posts);
     }
   }, [data]);

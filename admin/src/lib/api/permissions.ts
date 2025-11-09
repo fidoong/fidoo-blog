@@ -1,5 +1,4 @@
 import { apiClient } from './client';
-import type { ApiResponse } from './types';
 
 export interface Permission {
   id: string;
@@ -31,26 +30,26 @@ export interface CreatePermissionDto {
 }
 
 export const permissionsApi = {
-  getPermissions: (): Promise<ApiResponse<Permission[]>> => {
-    return apiClient.get('/permissions');
+  getPermissions: (): Promise<Permission[]> => {
+    return apiClient.get<Permission[]>('/permissions');
   },
 
-  getPermission: (id: string): Promise<ApiResponse<Permission>> => {
-    return apiClient.get(`/permissions/${id}`);
+  getPermission: (id: string): Promise<Permission> => {
+    return apiClient.get<Permission>(`/permissions/${id}`);
   },
 
-  createPermission: (data: CreatePermissionDto): Promise<ApiResponse<Permission>> => {
-    return apiClient.post('/permissions', data);
+  createPermission: (data: CreatePermissionDto): Promise<Permission> => {
+    return apiClient.post<Permission>('/permissions', data);
   },
 
   updatePermission: (
     id: string,
     data: Partial<CreatePermissionDto>,
-  ): Promise<ApiResponse<Permission>> => {
-    return apiClient.put(`/permissions/${id}`, data);
+  ): Promise<Permission> => {
+    return apiClient.put<Permission>(`/permissions/${id}`, data);
   },
 
-  deletePermission: (id: string): Promise<ApiResponse<void>> => {
-    return apiClient.delete(`/permissions/${id}`);
+  deletePermission: (id: string): Promise<void> => {
+    return apiClient.delete<void>(`/permissions/${id}`);
   },
 };

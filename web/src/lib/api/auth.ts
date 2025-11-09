@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ApiResponse, User, LoginResponse } from './types';
+import type { User, LoginResponse } from './types';
 
 export interface LoginDto {
   username: string;
@@ -19,33 +19,28 @@ export interface RefreshTokenDto {
 
 export const authApi = {
   // 用户注册
-  register: async (data: RegisterDto): Promise<ApiResponse<LoginResponse>> => {
-    const response = await apiClient.post('/auth/register', data);
-    return response.data;
+  register: async (data: RegisterDto): Promise<LoginResponse> => {
+    return apiClient.post<LoginResponse>('/auth/register', data);
   },
 
   // 用户登录
-  login: async (data: LoginDto): Promise<ApiResponse<LoginResponse>> => {
-    const response = await apiClient.post('/auth/login', data);
-    return response.data;
+  login: async (data: LoginDto): Promise<LoginResponse> => {
+    return apiClient.post<LoginResponse>('/auth/login', data);
   },
 
   // 刷新 token
-  refreshToken: async (refreshToken: string): Promise<ApiResponse<{ accessToken: string }>> => {
-    const response = await apiClient.post('/auth/refresh', { refreshToken });
-    return response.data;
+  refreshToken: async (refreshToken: string): Promise<{ accessToken: string }> => {
+    return apiClient.post<{ accessToken: string }>('/auth/refresh', { refreshToken });
   },
 
   // 获取当前用户信息
-  getProfile: async (): Promise<ApiResponse<User>> => {
-    const response = await apiClient.get('/auth/profile');
-    return response.data;
+  getProfile: async (): Promise<User> => {
+    return apiClient.get<User>('/auth/profile');
   },
 
   // 登出
-  logout: async (): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post('/auth/logout');
-    return response.data;
+  logout: async (): Promise<void> => {
+    return apiClient.post<void>('/auth/logout');
   },
 
   // GitHub OAuth 授权
@@ -64,8 +59,7 @@ export const authApi = {
   handleOAuthCallback: async (
     provider: 'github' | 'wechat',
     code: string,
-  ): Promise<ApiResponse<LoginResponse>> => {
-    const response = await apiClient.post(`/auth/${provider}/callback`, { code });
-    return response.data;
+  ): Promise<LoginResponse> => {
+    return apiClient.post<LoginResponse>(`/auth/${provider}/callback`, { code });
   },
 };

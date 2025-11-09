@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ApiResponse, Tag, CreateTagDto } from './types';
+import type { Tag, CreateTagDto } from './types';
 
 export interface UpdateTagDto {
   name?: string;
@@ -9,29 +9,24 @@ export interface UpdateTagDto {
 }
 
 export const tagsApi = {
-  getTags: async (): Promise<ApiResponse<Tag[]>> => {
-    const response = await apiClient.get('/tags');
-    return response.data;
+  getTags: async (): Promise<Tag[]> => {
+    return apiClient.get<Tag[]>('/tags');
   },
 
-  getTag: async (id: string): Promise<ApiResponse<Tag>> => {
-    const response = await apiClient.get(`/tags/${id}`);
-    return response.data;
+  getTag: async (id: string): Promise<Tag> => {
+    return apiClient.get<Tag>(`/tags/${id}`);
   },
 
-  createTag: async (data: CreateTagDto): Promise<ApiResponse<Tag>> => {
-    const response = await apiClient.post('/tags', data);
-    return response.data;
+  createTag: async (data: CreateTagDto): Promise<Tag> => {
+    return apiClient.post<Tag>('/tags', data);
   },
 
-  updateTag: async (id: string, data: UpdateTagDto): Promise<ApiResponse<Tag>> => {
-    const response = await apiClient.post(`/tags/${id}/update`, data);
-    return response.data;
+  updateTag: async (id: string, data: UpdateTagDto): Promise<Tag> => {
+    return apiClient.post<Tag>(`/tags/${id}/update`, data);
   },
 
-  deleteTag: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post(`/tags/${id}/delete`);
-    return response.data;
+  deleteTag: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/tags/${id}/delete`);
   },
 };
 

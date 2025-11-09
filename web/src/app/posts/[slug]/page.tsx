@@ -80,7 +80,7 @@ export default function PostDetailPage({
     enabled: !!slug,
   });
 
-  const post = data?.data;
+  const post = data;
 
   // 检查点赞状态
   const { data: likeCheckData } = useQuery({
@@ -123,11 +123,11 @@ export default function PostDetailPage({
     if (post) {
       setLikeCount(post.likeCount);
     }
-    if (likeCheckData?.data) {
-      setIsLiked(likeCheckData.data.isLiked);
+    if (likeCheckData) {
+      setIsLiked(likeCheckData.isLiked);
     }
-    if (favoriteCheckData?.data) {
-      setIsFavorited(favoriteCheckData.data.isFavorited);
+    if (favoriteCheckData) {
+      setIsFavorited(favoriteCheckData.isFavorited);
     }
   }, [post, likeCheckData, favoriteCheckData]);
 
@@ -138,7 +138,7 @@ export default function PostDetailPage({
       return isLiked ? likesApi.unlike('post', post.id) : likesApi.like('post', post.id);
     },
     onSuccess: (response) => {
-      const newIsLiked = response.data?.isLiked ?? !isLiked;
+      const newIsLiked = response.isLiked ?? !isLiked;
       setIsLiked(newIsLiked);
       setLikeCount((prev) => (newIsLiked ? prev + 1 : Math.max(0, prev - 1)));
       queryClient.invalidateQueries({ queryKey: ['post', slug] });
@@ -152,7 +152,7 @@ export default function PostDetailPage({
       return isFavorited ? favoritesApi.unfavorite(post.id) : favoritesApi.favorite(post.id);
     },
     onSuccess: (response) => {
-      const newIsFavorited = response.data?.isFavorited ?? !isFavorited;
+      const newIsFavorited = response.isFavorited ?? !isFavorited;
       setIsFavorited(newIsFavorited);
       queryClient.invalidateQueries({ queryKey: ['post', slug] });
     },
@@ -160,13 +160,13 @@ export default function PostDetailPage({
 
   // 增加浏览量（只执行一次）
   useEffect(() => {
-    if (data?.data?.id && !hasIncremented.current) {
+    if (data?.id && !hasIncremented.current) {
       hasIncremented.current = true;
-      postsApi.incrementViewCount(data.data.id).catch(() => {
+      postsApi.incrementViewCount(data.id).catch(() => {
         // 静默失败
       });
     }
-  }, [data?.data?.id]);
+  }, [data?.id]);
 
   if (isLoading) {
     return (

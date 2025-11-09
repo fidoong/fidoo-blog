@@ -36,16 +36,12 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
     try {
-      const response = await authApi.login(data);
-      if (response.code === 0 && response.data) {
-        const { user, accessToken, refreshToken } = response.data;
-        setAuth(user, accessToken, refreshToken);
-        toast.success('登录成功');
-        const redirect = searchParams.get('redirect') || '/dashboard';
-        router.push(redirect);
-      } else {
-        toast.error(response.message || '登录失败');
-      }
+      const loginResponse = await authApi.login(data);
+      const { user, accessToken, refreshToken } = loginResponse;
+      setAuth(user, accessToken, refreshToken);
+      toast.success('登录成功');
+      const redirect = searchParams.get('redirect') || '/dashboard';
+      router.push(redirect);
     } catch (error: any) {
       toast.error(error.response?.data?.message || '登录失败，请检查网络连接');
     } finally {

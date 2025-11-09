@@ -22,8 +22,8 @@ function PostsPage() {
     queryFn: () => postsApi.getPosts({ page, pageSize, keyword: keyword || undefined }),
   });
 
-  const posts = data?.data?.items || [];
-  const total = data?.data?.total || 0;
+  const posts = data?.items || [];
+  const total = data?.total || 0;
 
   return (
     <ProtectedRoute requiredPermissions={['posts:view']}>

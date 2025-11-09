@@ -1,39 +1,34 @@
 import { apiClient } from './client';
-import type { ApiResponse, Comment, CreateCommentDto, CommentStatus } from './types';
+import type { Comment, CreateCommentDto, CommentStatus } from './types';
 
 export const commentsApi = {
   // 获取文章评论
   getPostComments: async (
     postId: string,
     status?: CommentStatus,
-  ): Promise<ApiResponse<Comment[]>> => {
-    const response = await apiClient.get(`/comments/post/${postId}`, {
+  ): Promise<Comment[]> => {
+    return apiClient.get<Comment[]>(`/comments/post/${postId}`, {
       params: status ? { status } : {},
     });
-    return response.data;
   },
 
   // 创建评论
-  createComment: async (data: CreateCommentDto): Promise<ApiResponse<Comment>> => {
-    const response = await apiClient.post('/comments', data);
-    return response.data;
+  createComment: async (data: CreateCommentDto): Promise<Comment> => {
+    return apiClient.post<Comment>('/comments', data);
   },
 
   // 获取评论详情
-  getComment: async (id: string): Promise<ApiResponse<Comment>> => {
-    const response = await apiClient.get(`/comments/${id}`);
-    return response.data;
+  getComment: async (id: string): Promise<Comment> => {
+    return apiClient.get<Comment>(`/comments/${id}`);
   },
 
   // 更新评论
-  updateComment: async (id: string, content: string): Promise<ApiResponse<Comment>> => {
-    const response = await apiClient.post(`/comments/${id}/update`, { content });
-    return response.data;
+  updateComment: async (id: string, content: string): Promise<Comment> => {
+    return apiClient.post<Comment>(`/comments/${id}/update`, { content });
   },
 
   // 删除评论
-  deleteComment: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post(`/comments/${id}/delete`);
-    return response.data;
+  deleteComment: async (id: string): Promise<void> => {
+    return apiClient.post<void>(`/comments/${id}/delete`);
   },
 };

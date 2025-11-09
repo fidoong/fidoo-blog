@@ -98,15 +98,11 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
     try {
       setIsSubmitting(true);
       setError('');
-      const response = await authApi.login(data);
-      if (response.code === 0 && response.data) {
-        const { user, accessToken, refreshToken } = response.data;
-        setAuth(user, accessToken, refreshToken);
-        onClose();
-        loginForm.reset();
-      } else {
-        setError(response.message || '登录失败，请检查用户名和密码');
-      }
+      const loginResponse = await authApi.login(data);
+      const { user, accessToken, refreshToken } = loginResponse;
+      setAuth(user, accessToken, refreshToken);
+      onClose();
+      loginForm.reset();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string };
       setError(error.response?.data?.message || error.message || '登录失败，请检查用户名和密码');
@@ -122,15 +118,11 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
       setError('');
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...registerData } = data;
-      const response = await authApi.register(registerData);
-      if (response.code === 0 && response.data) {
-        const { user, accessToken, refreshToken } = response.data;
-        setAuth(user, accessToken, refreshToken);
-        onClose();
-        registerForm.reset();
-      } else {
-        setError(response.message || '注册失败，请稍后重试');
-      }
+      const registerResponse = await authApi.register(registerData);
+      const { user, accessToken, refreshToken } = registerResponse;
+      setAuth(user, accessToken, refreshToken);
+      onClose();
+      registerForm.reset();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string };
       setError(error.response?.data?.message || error.message || '注册失败，请稍后重试');

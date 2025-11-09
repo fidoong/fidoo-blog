@@ -18,8 +18,8 @@ function SystemPage() {
     queryFn: () => systemApi.getProcessInfo(),
   });
 
-  const info = systemInfo?.data;
-  const process = processInfo?.data;
+  const info = systemInfo;
+  const process = processInfo;
 
   return (
     <ProtectedRoute requiredPermissions={['system:info:view']}>
