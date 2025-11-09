@@ -17,6 +17,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { I18nService } from 'nestjs-i18n';
 import { ResponseCode } from '../enums/response-code.enum';
 import { BusinessException } from '../exceptions/business.exception';
 
@@ -38,14 +39,19 @@ interface ErrorResponse {
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
 
+  constructor(private readonly i18n: I18nService) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // 获取当前语言
+    const lang = this.getLanguage(request);
+
     let httpStatus = HttpStatus.OK; // 默认使用 200，业务错误通过 code 表示
     let code = ResponseCode.INTERNAL_ERROR;
-    let message = '服务器内部错误';
+    let message = this.i18n.translate('errors.internalError', { lang });
     let errorData: unknown = undefined;
 
     // 处理业务异常（BusinessException）
@@ -57,10 +63,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const responseObj = exceptionResponse as {
           code?: number;
           message?: string;
+          messageKey?: string; // i18n 翻译键
           data?: unknown;
         };
         code = responseObj.code ?? ResponseCode.INTERNAL_ERROR;
-        message = responseObj.message || exception.message;
+        
+        // 如果提供了 messageKey，使用 i18n 翻译
+        if (responseObj.messageKey) {
+          message = this.i18n.translate(responseObj.messageKey, {
+            args: responseObj.data as Record<string, any>,
+            lang,
+          });
+        } else {
+          message = responseObj.message || exception.message;
+        }
         errorData = responseObj.data;
       } else {
         code = exception.code;
@@ -99,7 +115,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     else if (exception instanceof Error) {
       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       code = ResponseCode.INTERNAL_ERROR;
-      message = exception.message || '服务器内部错误';
+      message = exception.message || this.i18n.translate('errors.internalError', { lang });
     }
 
     // 构建错误响应
@@ -141,5 +157,39 @@ export class HttpExceptionFilter implements ExceptionFilter {
       default:
         return ResponseCode.INTERNAL_ERROR;
     }
+  }
+
+  /**
+   * 从请求中获取语言代码
+   */
+  private getLanguage(request: Request): string {
+    // 优先级：查询参数 > 请求头 > 默认语言
+    const queryLang = request.query?.lang || request.query?.locale || request.query?.l;
+    if (queryLang && typeof queryLang === 'string') {
+      return queryLang;
+    }
+
+    const headerLang = request.headers['x-custom-lang'];
+    if (headerLang && typeof headerLang === 'string') {
+      return headerLang;
+    }
+
+    const acceptLanguage = request.headers['accept-language'];
+    if (acceptLanguage) {
+      // 解析 Accept-Language 头，例如：zh-CN,zh;q=0.9,en;q=0.8
+      const languages = acceptLanguage.split(',').map((lang) => {
+        const [code, q = 'q=1'] = lang.trim().split(';');
+        const quality = parseFloat(q.split('=')[1] || '1');
+        return { code: code.trim(), quality };
+      });
+      languages.sort((a, b) => b.quality - a.quality);
+      const preferredLang = languages[0]?.code;
+      if (preferredLang) {
+        // 简化语言代码，例如：zh-CN -> zh-CN, en-US -> en-US
+        return preferredLang.toLowerCase().includes('zh') ? 'zh-CN' : 'en-US';
+      }
+    }
+
+    return 'zh-CN'; // 默认语言
   }
 }

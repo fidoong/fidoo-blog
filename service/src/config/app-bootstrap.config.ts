@@ -44,8 +44,8 @@ export class AppBootstrapConfig {
       }),
     );
 
-    // 全局异常过滤器
-    app.useGlobalFilters(new HttpExceptionFilter());
+    // 全局异常过滤器已在 app.module.ts 中通过 APP_FILTER 提供者注册
+    // 这里不再需要手动注册
 
     // 全局响应拦截器
     app.useGlobalInterceptors(new TransformInterceptor());
@@ -56,7 +56,8 @@ export class AppBootstrapConfig {
     // 优雅关闭
     app.enableShutdownHooks();
 
-    logger.log(`应用启动成功，监听端口: ${this.getPort()}`);
+    // 注意：这里只是配置完成，实际启动在 main.ts 中
+    logger.log(`应用配置完成，准备启动端口: ${this.getPort()}`);
     logger.log(`API 文档地址: http://localhost:${this.getPort()}/${apiPrefix}/docs`);
     logger.log(`环境: ${configService.get('NODE_ENV')}`);
   }

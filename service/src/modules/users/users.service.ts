@@ -39,13 +39,13 @@ export class UsersService {
     // 检查用户名是否已存在
     const existingUser = await this.findByUsername(createUserDto.username);
     if (existingUser) {
-      throw BusinessException.conflict('用户名已存在', { field: 'username' });
+      throw BusinessException.conflict('errors.usernameExists', { field: 'username' });
     }
 
     // 检查邮箱是否已存在
     const existingEmail = await this.findByEmail(createUserDto.email);
     if (existingEmail) {
-      throw BusinessException.conflict('邮箱已被注册', { field: 'email' });
+      throw BusinessException.conflict('errors.emailExists', { field: 'email' });
     }
 
     const hashedPassword = await CryptoUtil.hashPassword(createUserDto.password);
@@ -199,7 +199,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw BusinessException.notFound('用户不存在');
+      throw BusinessException.notFound('errors.userNotFound');
     }
 
     return user;

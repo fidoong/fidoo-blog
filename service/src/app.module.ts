@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -18,6 +19,7 @@ import oauthConfig from '@/config/oauth.config';
 import { LoggerModule } from '@/common/logger/logger.module';
 import { DatabaseModule } from '@/database/database.module';
 import { CacheModule as CommonCacheModule } from '@/common/cache';
+import { AppI18nModule } from '@/i18n/i18n.module';
 
 // 业务模块
 import { AuthModule } from '@/modules/auth/auth.module';
@@ -39,10 +41,14 @@ import { RolesModule } from '@/modules/roles/roles.module';
 import { UserRolesModule } from '@/modules/user-roles/user-roles.module';
 import { DictionariesModule } from '@/modules/dictionaries/dictionaries.module';
 import { AuditLogsModule } from '@/modules/audit-logs/audit-logs.module';
+import { WebSocketModule } from '@/modules/websocket/websocket.module';
 
 // 健康检查
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
+// 过滤器
+import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
 
 @Module({
   imports: [
@@ -126,6 +132,9 @@ import { AppService } from './app.service';
     // 日志模块
     LoggerModule,
 
+    // 国际化模块
+    AppI18nModule,
+
     // 公共缓存模块
     CommonCacheModule,
 
@@ -149,8 +158,16 @@ import { AppService } from './app.service';
     UserRolesModule,
     DictionariesModule,
     AuditLogsModule,
+    WebSocketModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // 全局异常过滤器（支持依赖注入）
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

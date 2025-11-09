@@ -13,6 +13,7 @@ import {
   LogoutOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
+import { NotificationBell } from '@/components/notification/NotificationBell';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { authApi } from '@/lib/api/auth';
@@ -241,6 +242,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <Breadcrumb menus={menus || []} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <NotificationBell />
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
                 <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Avatar icon={<UserOutlined />} src={user?.avatar} />

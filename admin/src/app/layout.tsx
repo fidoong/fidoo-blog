@@ -5,7 +5,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Suspense } from 'react';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
@@ -14,8 +14,9 @@ import { Providers } from './providers';
 import { FormDialogProvider } from '@/components/form/FormDialog';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { ErrorBoundaryWrapper } from '@/components/error/ErrorBoundaryWrapper';
+import { WebSocketProvider } from '@/components/websocket/WebSocketProvider';
 
-dayjs.locale('zh-cn');
+// dayjs 语言设置将在运行时根据用户选择动态设置
 
 // 优化字体加载：使用 next/font 自动优化，添加 preload
 const inter = Inter({
@@ -36,6 +37,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
+
+  // 设置 dayjs 语言
+  dayjs.locale('zh-cn');
 
   return (
     <html lang="zh-CN">
@@ -58,13 +62,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
             }}
           >
-            <Providers>
-              <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
-                <FormDialogProvider>
-                  <AuthProvider>{children}</AuthProvider>
-                </FormDialogProvider>
-              </Suspense>
-            </Providers>
+            <App>
+              <Providers>
+                <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+                  <FormDialogProvider>
+                    <AuthProvider>
+                      <WebSocketProvider>{children}</WebSocketProvider>
+                    </AuthProvider>
+                  </FormDialogProvider>
+                </Suspense>
+              </Providers>
+            </App>
           </ConfigProvider>
         </ErrorBoundaryWrapper>
       </body>

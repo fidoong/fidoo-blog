@@ -1,0 +1,27 @@
+{
+  "errors": {
+    "badRequest": "Bad Request",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "notFound": "Resource Not Found",
+    "conflict": "Resource Conflict",
+    "validationError": "Validation Error",
+    "internalError": "Internal Server Error",
+    "userNotFound": "User Not Found",
+    "userDisabled": "User Has Been Disabled",
+    "userForcedLogout": "User Has Been Forced to Logout, Please Login Again",
+    "usernameOrPasswordError": "Username or Password Error",
+    "usernameExists": "Username Already Exists",
+    "emailExists": "Email Already Registered",
+    "deviceNotFound": "Device Not Found",
+    "tokenNotFound": "Token Not Found",
+    "tokenRevoked": "Token Has Been Revoked"
+  },
+  "success": {
+    "created": "Created Successfully",
+    "updated": "Updated Successfully",
+    "deleted": "Deleted Successfully",
+    "operationSuccess": "Operation Successful"
+  }
+}
+

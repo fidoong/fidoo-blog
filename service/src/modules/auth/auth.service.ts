@@ -34,12 +34,12 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<Omit<User, 'password'>> {
     const user = await this.usersService.findByUsername(username);
     if (!user) {
-      throw BusinessException.unauthorized('用户名或密码错误');
+      throw BusinessException.unauthorized('errors.usernameOrPasswordError');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw BusinessException.unauthorized('用户名或密码错误');
+      throw BusinessException.unauthorized('errors.usernameOrPasswordError');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

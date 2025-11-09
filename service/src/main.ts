@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 import { AppBootstrapConfig } from './config/app-bootstrap.config';
 import { LoggerService } from '@/common/logger/logger.service';
@@ -40,6 +41,10 @@ async function bootstrap() {
     });
 
     console.log('应用创建成功，正在配置...');
+    
+    // 配置 WebSocket 适配器
+    app.useWebSocketAdapter(new IoAdapter(app));
+    
     // 配置应用
     await AppBootstrapConfig.configure(app);
 
@@ -49,6 +54,7 @@ async function bootstrap() {
     await app.listen(port);
     logger.log(`服务器已启动，监听端口: ${port}`);
     logger.log(`CORS 已启用，允许的源: ${JSON.stringify(allowedOrigins)}`);
+    logger.log(`WebSocket 服务已启动，命名空间: /ws`);
   } catch (error) {
     console.error('应用启动失败:');
     console.error(error);
@@ -119,6 +125,17 @@ async function bootstrap() {
         console.error('\n⚠️  JWT 配置错误:');
         console.error('  - 请检查 .env 文件中的 JWT_SECRET 配置');
         console.error('  - 确保 JWT_SECRET 不为空且长度足够');
+      }
+
+      // 检查是否是端口占用错误
+      if (errorMessage.includes('eaddrinuse') || errorMessage.includes('address already in use')) {
+        console.error('\n⚠️  端口占用错误:');
+        console.error('  ❌ 端口 3005 已被占用');
+        console.error('  📍 解决方案:');
+        console.error('     1. 查找占用端口的进程: lsof -ti:3005');
+        console.error('     2. 终止进程: lsof -ti:3005 | xargs kill -9');
+        console.error('     3. 或使用项目脚本: ./scripts/kill-port.sh 3005');
+        console.error('     4. 检查是否有其他服务实例在运行');
       }
     }
 

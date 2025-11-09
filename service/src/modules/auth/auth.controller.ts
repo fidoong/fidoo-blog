@@ -135,7 +135,7 @@ export class AuthController {
   async deactivateDevice(@CurrentUser() user: User, @Query('deviceId') deviceId: string) {
     const success = await this.deviceService.deactivateDevice(user.id, deviceId);
     if (!success) {
-      throw BusinessException.notFound('设备不存在');
+      throw BusinessException.notFound('errors.deviceNotFound');
     }
     return { message: '设备已停用' };
   }
@@ -147,7 +147,7 @@ export class AuthController {
   async deleteDevice(@CurrentUser() user: User, @Query('deviceId') deviceId: string) {
     const success = await this.deviceService.deleteDevice(user.id, deviceId);
     if (!success) {
-      throw BusinessException.notFound('设备不存在');
+      throw BusinessException.notFound('errors.deviceNotFound');
     }
     return { message: '设备已删除' };
   }

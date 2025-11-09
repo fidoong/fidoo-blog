@@ -12,7 +12,8 @@ import { ResponseCode } from '../enums/response-code.enum';
 
 export interface BusinessExceptionOptions {
   code: number; // 业务错误码（必须指定）
-  message: string; // 错误消息
+  message?: string; // 错误消息（可选，如果提供了 messageKey 则优先使用 messageKey）
+  messageKey?: string; // i18n 翻译键（可选，如 'errors.userNotFound'）
   data?: unknown; // 错误详情数据
 }
 
@@ -26,13 +27,25 @@ export class BusinessException extends HttpException {
   public readonly data?: unknown;
 
   constructor(options: BusinessExceptionOptions) {
-    const { code, message, data } = options;
+    const { code, message, messageKey, data } = options;
 
     // 构建响应体
-    const responseBody: { code: number; message: string; data?: unknown } = {
+    const responseBody: { 
+      code: number; 
+      message?: string; 
+      messageKey?: string; 
+      data?: unknown 
+    } = {
       code,
-      message,
     };
+    
+    // 如果提供了 messageKey，优先使用 messageKey（由过滤器进行翻译）
+    if (messageKey) {
+      responseBody.messageKey = messageKey;
+    } else if (message) {
+      responseBody.message = message;
+    }
+    
     if (data !== undefined) {
       responseBody.data = data;
     }
@@ -49,10 +62,11 @@ export class BusinessException extends HttpException {
    * 创建参数错误异常
    * HTTP 200 + code: 400
    */
-  static badRequest(message: string, data?: unknown): BusinessException {
+  static badRequest(messageOrKey: string, data?: unknown): BusinessException {
+    const isKey = messageOrKey.includes('.');
     return new BusinessException({
       code: ResponseCode.BAD_REQUEST,
-      message,
+      ...(isKey ? { messageKey: messageOrKey } : { message: messageOrKey }),
       data,
     });
   }
@@ -62,10 +76,11 @@ export class BusinessException extends HttpException {
    * HTTP 200 + code: 401
    * 例如：密码错误、token 无效等业务错误
    */
-  static unauthorized(message: string = '未授权', data?: unknown): BusinessException {
+  static unauthorized(messageOrKey: string = 'errors.unauthorized', data?: unknown): BusinessException {
+    const isKey = messageOrKey.includes('.');
     return new BusinessException({
       code: ResponseCode.UNAUTHORIZED,
-      message,
+      ...(isKey ? { messageKey: messageOrKey } : { message: messageOrKey }),
       data,
     });
   }
@@ -74,10 +89,11 @@ export class BusinessException extends HttpException {
    * 创建禁止访问异常（业务层面）
    * HTTP 200 + code: 403
    */
-  static forbidden(message: string = '禁止访问', data?: unknown): BusinessException {
+  static forbidden(messageOrKey: string = 'errors.forbidden', data?: unknown): BusinessException {
+    const isKey = messageOrKey.includes('.');
     return new BusinessException({
       code: ResponseCode.FORBIDDEN,
-      message,
+      ...(isKey ? { messageKey: messageOrKey } : { message: messageOrKey }),
       data,
     });
   }
@@ -86,10 +102,11 @@ export class BusinessException extends HttpException {
    * 创建资源不存在异常（业务层面）
    * HTTP 200 + code: 404
    */
-  static notFound(message: string, data?: unknown): BusinessException {
+  static notFound(messageOrKey: string, data?: unknown): BusinessException {
+    const isKey = messageOrKey.includes('.');
     return new BusinessException({
       code: ResponseCode.NOT_FOUND,
-      message,
+      ...(isKey ? { messageKey: messageOrKey } : { message: messageOrKey }),
       data,
     });
   }
@@ -98,10 +115,11 @@ export class BusinessException extends HttpException {
    * 创建资源冲突异常（业务层面）
    * HTTP 200 + code: 409
    */
-  static conflict(message: string, data?: unknown): BusinessException {
+  static conflict(messageOrKey: string, data?: unknown): BusinessException {
+    const isKey = messageOrKey.includes('.');
     return new BusinessException({
       code: ResponseCode.CONFLICT,
-      message,
+      ...(isKey ? { messageKey: messageOrKey } : { message: messageOrKey }),
       data,
     });
   }
@@ -110,10 +128,11 @@ export class BusinessException extends HttpException {
    * 创建验证错误异常（业务层面）
    * HTTP 200 + code: 422
    */
-  static validationError(message: string, data?: unknown): BusinessException {
+  static validationError(messageOrKey: string, data?: unknown): BusinessException {
+    const isKey = messageOrKey.includes('.');
     return new BusinessException({
       code: ResponseCode.VALIDATION_ERROR,
-      message,
+      ...(isKey ? { messageKey: messageOrKey } : { message: messageOrKey }),
       data,
     });
   }
@@ -123,10 +142,11 @@ export class BusinessException extends HttpException {
    * HTTP 200 + code: 500
    * 注意：真正的服务器错误（如代码异常）应该直接抛出 Error，由过滤器处理
    */
-  static internalError(message: string = '服务器内部错误', data?: unknown): BusinessException {
+  static internalError(messageOrKey: string = 'errors.internalError', data?: unknown): BusinessException {
+    const isKey = messageOrKey.includes('.');
     return new BusinessException({
       code: ResponseCode.INTERNAL_ERROR,
-      message,
+      ...(isKey ? { messageKey: messageOrKey } : { message: messageOrKey }),
       data,
     });
   }

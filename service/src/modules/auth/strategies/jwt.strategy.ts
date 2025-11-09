@@ -29,13 +29,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // 获取原始 token
     const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     if (!token) {
-      throw BusinessException.unauthorized('Token 不存在');
+      throw BusinessException.unauthorized('errors.tokenNotFound');
     }
 
     // 检查 token 是否在黑名单中
     const isBlacklisted = await this.tokenBlacklistService.isBlacklisted(token);
     if (isBlacklisted) {
-      throw BusinessException.unauthorized('Token 已被撤销');
+      throw BusinessException.unauthorized('errors.tokenRevoked');
     }
 
     // 检查用户是否被强制登出
@@ -45,19 +45,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         payload.iat,
       );
       if (isUserBlacklisted) {
-        throw BusinessException.unauthorized('用户已被强制登出，请重新登录');
+        throw BusinessException.unauthorized('errors.userForcedLogout');
       }
     }
 
     // 验证用户是否存在
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
-      throw BusinessException.unauthorized('用户不存在');
+      throw BusinessException.unauthorized('errors.userNotFound');
     }
 
     // 检查用户状态
     if (user.status === 'banned' || user.status === 'inactive') {
-      throw BusinessException.unauthorized('用户已被禁用');
+      throw BusinessException.unauthorized('errors.userDisabled');
     }
 
     return user;
