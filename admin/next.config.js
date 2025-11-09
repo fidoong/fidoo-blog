@@ -7,6 +7,8 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['antd', '@ant-design/icons', '@formily/antd-v5'],
+    // 启用部分预渲染，提升首屏性能
+    ppr: false, // 暂时关闭，等Next.js稳定后启用
   },
 
   compiler: {
@@ -21,6 +23,19 @@ const nextConfig = {
   swcMinify: true,
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
+
+  // 图片优化配置
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+
+  // 优化输出
+  output: 'standalone',
 
   // API 代理
   async rewrites() {
