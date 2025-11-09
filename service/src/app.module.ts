@@ -33,6 +33,10 @@ import { LikesModule } from '@/modules/likes/likes.module';
 import { FavoritesModule } from '@/modules/favorites/favorites.module';
 import { NotificationsModule } from '@/modules/notifications/notifications.module';
 import { UserProfilesModule } from '@/modules/user-profiles/user-profiles.module';
+import { MenusModule } from '@/modules/menus/menus.module';
+import { PermissionsModule } from '@/modules/permissions/permissions.module';
+import { RolesModule } from '@/modules/roles/roles.module';
+import { UserRolesModule } from '@/modules/user-roles/user-roles.module';
 
 // 健康检查
 import { AppController } from './app.controller';
@@ -54,17 +58,35 @@ import { AppService } from './app.service';
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        store: await redisStore({
-          socket: {
-            host: configService.get('redis.host'),
-            port: configService.get('redis.port'),
-          },
-          password: configService.get('redis.password'),
-          database: configService.get('redis.db'),
-          ttl: 60 * 1000, // 默认 60 秒
-        }),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        try {
+          const redisHost = configService.get('redis.host', 'localhost');
+          const redisPort = configService.get('redis.port', 6379);
+          const redisPassword = configService.get('redis.password', '');
+          const redisDb = configService.get('redis.db', 0);
+
+          console.log(`正在连接 Redis: ${redisHost}:${redisPort}`);
+
+          const store = await redisStore({
+            socket: {
+              host: redisHost,
+              port: redisPort,
+            },
+            password: redisPassword || undefined,
+            database: redisDb,
+            ttl: 60 * 1000, // 默认 60 秒
+          });
+
+          console.log('Redis 连接成功');
+          return { store };
+        } catch (error) {
+          console.error('Redis 连接失败:', error);
+          console.error('提示: 请确保 Redis 服务已启动');
+          console.error('  - 检查 Redis 是否运行: redis-cli ping');
+          console.error('  - 启动 Redis: redis-server (或使用 Docker)');
+          throw error;
+        }
+      },
       inject: [ConfigService],
     }),
 
@@ -119,6 +141,10 @@ import { AppService } from './app.service';
     FavoritesModule,
     NotificationsModule,
     UserProfilesModule,
+    MenusModule,
+    PermissionsModule,
+    RolesModule,
+    UserRolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

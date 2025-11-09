@@ -8,8 +8,9 @@ import { Like } from '@/modules/likes/entities/like.entity';
 import { Favorite } from '@/modules/favorites/entities/favorite.entity';
 import { Notification } from '@/modules/notifications/entities/notification.entity';
 import { UserProfile } from '@/modules/user-profiles/entities/user-profile.entity';
+import { UserRole } from '@/modules/user-roles/entities/user-role.entity';
 
-export enum UserRole {
+export enum UserRoleEnum {
   ADMIN = 'admin',
   EDITOR = 'editor',
   USER = 'user',
@@ -46,10 +47,10 @@ export class User extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: UserRole,
-    default: UserRole.USER,
+    enum: UserRoleEnum,
+    default: UserRoleEnum.USER,
   })
-  role: UserRole;
+  role: UserRoleEnum; // 保留旧字段以兼容，新系统使用 userRoles 关联
 
   @Column({
     type: 'enum',
@@ -87,4 +88,7 @@ export class User extends BaseEntity {
 
   @OneToOne(() => UserProfile, (profile) => profile.user)
   profile: UserProfile;
+
+  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  userRoles: UserRole[];
 }

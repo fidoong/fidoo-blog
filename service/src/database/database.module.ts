@@ -12,6 +12,12 @@ import { Like } from '@/modules/likes/entities/like.entity';
 import { Favorite } from '@/modules/favorites/entities/favorite.entity';
 import { Notification } from '@/modules/notifications/entities/notification.entity';
 import { UserProfile } from '@/modules/user-profiles/entities/user-profile.entity';
+import { Menu } from '@/modules/menus/entities/menu.entity';
+import { Permission } from '@/modules/permissions/entities/permission.entity';
+import { Role } from '@/modules/roles/entities/role.entity';
+import { UserRole } from '@/modules/user-roles/entities/user-role.entity';
+import { RolePermission } from '@/modules/role-permissions/entities/role-permission.entity';
+import { RoleMenu } from '@/modules/role-menus/entities/role-menu.entity';
 
 @Module({
   imports: [
@@ -36,6 +42,12 @@ import { UserProfile } from '@/modules/user-profiles/entities/user-profile.entit
           Favorite,
           Notification,
           UserProfile,
+          Menu,
+          Permission,
+          Role,
+          UserRole,
+          RolePermission,
+          RoleMenu,
         ],
         synchronize: configService.get('database.synchronize'),
         logging: configService.get('database.logging'),

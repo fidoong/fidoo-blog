@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import * as bcrypt from 'bcrypt';
-import { User, UserRole, UserStatus } from '@/modules/users/entities/user.entity';
+import { User, UserRoleEnum, UserStatus } from '@/modules/users/entities/user.entity';
 import { UserProfile } from '@/modules/user-profiles/entities/user-profile.entity';
 import { Category } from '@/modules/categories/entities/category.entity';
 import { Tag } from '@/modules/tags/entities/tag.entity';
@@ -419,7 +419,7 @@ async function generateLargeData() {
         nickname: name,
         bio: `${name}，专注于技术分享`,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-        role: i === 0 ? UserRole.ADMIN : i < 5 ? UserRole.EDITOR : UserRole.USER,
+        role: i === 0 ? UserRoleEnum.ADMIN : i < 5 ? UserRoleEnum.EDITOR : UserRoleEnum.USER,
         status: UserStatus.ACTIVE,
         lastLoginAt: randomDate(30),
       });
@@ -458,7 +458,7 @@ async function generateLargeData() {
         location: randomChoice(cities),
         company: randomChoice(companies),
         github: `https://github.com/${user.username}`,
-        isVerified: user.role !== UserRole.USER,
+        isVerified: user.role !== UserRoleEnum.USER,
       });
       profiles.push(profile);
     }

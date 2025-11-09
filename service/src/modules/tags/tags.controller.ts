@@ -5,7 +5,7 @@ import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { UserRole } from '@/modules/users/entities/user.entity';
+import { UserRoleEnum } from '@/modules/users/entities/user.entity';
 
 @ApiTags('tags')
 @Controller('tags')
@@ -14,7 +14,7 @@ export class TagsController {
 
   @Post()
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '创建标签' })
   create(@Body() createTagDto: CreateTagDto) {
     return this.tagsService.create(createTagDto);
@@ -50,7 +50,7 @@ export class TagsController {
 
   @Post(':id/update')
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '更新标签' })
   update(@Param('id') id: string, @Body() updateTagDto: UpdateTagDto) {
     return this.tagsService.update(id, updateTagDto);
@@ -58,7 +58,7 @@ export class TagsController {
 
   @Post(':id/delete')
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRoleEnum.ADMIN)
   @ApiOperation({ summary: '删除标签' })
   remove(@Param('id') id: string) {
     return this.tagsService.remove(id);

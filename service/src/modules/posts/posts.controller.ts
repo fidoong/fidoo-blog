@@ -6,7 +6,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { UserRole, User } from '@/modules/users/entities/user.entity';
+import { UserRoleEnum, User } from '@/modules/users/entities/user.entity';
 import { PostStatus } from './entities/post.entity';
 import { QueryDto } from '@/common/dto';
 
@@ -54,7 +54,7 @@ export class PostsController {
 
   @Post(':id/update')
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '更新文章' })
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postsService.update(id, updatePostDto);
@@ -62,7 +62,7 @@ export class PostsController {
 
   @Post(':id/delete')
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '删除文章' })
   remove(@Param('id') id: string) {
     return this.postsService.remove(id);

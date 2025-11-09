@@ -21,6 +21,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from '@/modules/users/users.service';
 import type { Response, Request } from 'express';
 
 @ApiTags('auth')
@@ -29,6 +30,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Public()
@@ -62,6 +64,30 @@ export class AuthController {
   @ApiOperation({ summary: '获取当前用户信息' })
   async getProfile(@CurrentUser() user: User) {
     return user;
+  }
+
+  @Get('permissions')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '获取当前用户权限列表' })
+  async getPermissions(@CurrentUser() user: User) {
+    const permissions = await this.usersService.getUserPermissions(user.id);
+    return {
+      code: 0,
+      data: permissions,
+      message: '获取成功',
+    };
+  }
+
+  @Get('menus')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '获取当前用户菜单列表' })
+  async getMenus(@CurrentUser() user: User) {
+    const menus = await this.usersService.getUserMenus(user.id);
+    return {
+      code: 0,
+      data: menus,
+      message: '获取成功',
+    };
   }
 
   @Post('logout')

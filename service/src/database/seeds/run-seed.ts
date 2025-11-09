@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import * as bcrypt from 'bcrypt';
-import { User, UserRole, UserStatus } from '@/modules/users/entities/user.entity';
+import { User, UserRoleEnum, UserStatus } from '@/modules/users/entities/user.entity';
 import { UserProfile } from '@/modules/user-profiles/entities/user-profile.entity';
 import { Category } from '@/modules/categories/entities/category.entity';
 import { Tag } from '@/modules/tags/entities/tag.entity';
@@ -58,7 +58,7 @@ async function seed() {
       password: hashedPassword,
       nickname: '管理员',
       bio: '系统管理员',
-      role: UserRole.ADMIN,
+      role: UserRoleEnum.ADMIN,
       status: UserStatus.ACTIVE,
     });
     await userRepository.save(adminUser);
@@ -69,7 +69,7 @@ async function seed() {
       password: hashedPassword,
       nickname: '编辑',
       bio: '内容编辑',
-      role: UserRole.EDITOR,
+      role: UserRoleEnum.EDITOR,
       status: UserStatus.ACTIVE,
     });
     await userRepository.save(editorUser);
@@ -81,7 +81,7 @@ async function seed() {
         password: hashedPassword,
         nickname: '张三',
         bio: '前端开发工程师，专注于 React 和 Vue.js',
-        role: UserRole.USER,
+        role: UserRoleEnum.USER,
         status: UserStatus.ACTIVE,
       }),
       userRepository.create({
@@ -90,7 +90,7 @@ async function seed() {
         password: hashedPassword,
         nickname: '李四',
         bio: '后端开发工程师，擅长 Node.js 和 NestJS',
-        role: UserRole.USER,
+        role: UserRoleEnum.USER,
         status: UserStatus.ACTIVE,
       }),
       userRepository.create({
@@ -99,7 +99,7 @@ async function seed() {
         password: hashedPassword,
         nickname: '王五',
         bio: '全栈开发工程师',
-        role: UserRole.USER,
+        role: UserRoleEnum.USER,
         status: UserStatus.ACTIVE,
       }),
     ];
@@ -123,7 +123,7 @@ async function seed() {
         location: ['北京', '上海', '深圳', '杭州', '广州'][Math.floor(Math.random() * 5)],
         company: ['腾讯', '阿里', '字节', '美团', '百度'][Math.floor(Math.random() * 5)],
         github: `https://github.com/${user.username}`,
-        isVerified: user.role === UserRole.ADMIN || user.role === UserRole.EDITOR,
+        isVerified: user.role === UserRoleEnum.ADMIN || user.role === UserRoleEnum.EDITOR,
       }),
     );
     await userProfileRepository.save(profiles);

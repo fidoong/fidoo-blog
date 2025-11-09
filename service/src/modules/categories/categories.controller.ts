@@ -5,7 +5,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { UserRole } from '@/modules/users/entities/user.entity';
+import { UserRoleEnum } from '@/modules/users/entities/user.entity';
 
 @ApiTags('categories')
 @Controller('categories')
@@ -14,7 +14,7 @@ export class CategoriesController {
 
   @Post()
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '创建分类' })
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
@@ -78,7 +78,7 @@ export class CategoriesController {
 
   @Post(':id/update')
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '更新分类' })
   update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoriesService.update(id, updateCategoryDto);
@@ -86,7 +86,7 @@ export class CategoriesController {
 
   @Post(':id/delete')
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRoleEnum.ADMIN)
   @ApiOperation({ summary: '删除分类' })
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);

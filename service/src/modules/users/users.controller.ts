@@ -13,7 +13,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { UserRole } from './entities/user.entity';
+import { UserRoleEnum } from './entities/user.entity';
 import { QueryDto } from '@/common/dto';
 
 @ApiTags('users')
@@ -24,14 +24,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRoleEnum.ADMIN)
   @ApiOperation({ summary: '创建用户 (仅管理员)' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '获取用户列表' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'pageSize', required: false, example: 10 })
@@ -53,7 +53,7 @@ export class UsersController {
   }
 
   @Post(':id/delete')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRoleEnum.ADMIN)
   @ApiOperation({ summary: '删除用户 (仅管理员)' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);

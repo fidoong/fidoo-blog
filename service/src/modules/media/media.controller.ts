@@ -11,7 +11,7 @@ import {
 } from '@nestjs/swagger';
 import { MediaService } from './media.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { User, UserRole } from '@/modules/users/entities/user.entity';
+import { User, UserRoleEnum } from '@/modules/users/entities/user.entity';
 import { MediaType } from './entities/media.entity';
 import { Roles } from '@/common/decorators/roles.decorator';
 
@@ -22,7 +22,7 @@ export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Post('upload')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: '上传文件' })
   @ApiConsumes('multipart/form-data')
@@ -65,7 +65,7 @@ export class MediaController {
   }
 
   @Post(':id/delete')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '删除媒体文件' })
   remove(@Param('id') id: string) {
     return this.mediaService.remove(id);

@@ -14,7 +14,7 @@ import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { User, UserRole } from '@/modules/users/entities/user.entity';
+import { User, UserRoleEnum } from '@/modules/users/entities/user.entity';
 import { CommentStatus } from './entities/comment.entity';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Public } from '@/common/decorators/public.decorator';
@@ -41,7 +41,7 @@ export class CommentsController {
 
   @Get()
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '获取所有评论（管理用）' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -77,7 +77,7 @@ export class CommentsController {
   @Post(':id/approve')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '通过评论' })
   approve(@Param('id') id: string) {
     return this.commentsService.approve(id);
@@ -86,7 +86,7 @@ export class CommentsController {
   @Post(':id/reject')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRoleEnum.ADMIN, UserRoleEnum.EDITOR)
   @ApiOperation({ summary: '拒绝评论' })
   reject(@Param('id') id: string) {
     return this.commentsService.reject(id);
