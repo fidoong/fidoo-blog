@@ -6,6 +6,7 @@ import { useCallback, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { tagsApi, type Tag, type CreateTagDto, type UpdateTagDto } from '@/lib/api/tags';
+import type { PaginatedResponse } from '@/lib/api/types';
 
 export interface UseTagsMutationOptions {
   successMessages?: {
@@ -65,6 +66,18 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
 
   const createMutation = useMutation({
     mutationFn: tagsApi.createTag,
+    onMutate: async (newTag) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Tag>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Tag>>(queryKey, {
+          ...previousData,
+          items: [{ ...newTag, id: 'temp-' + Date.now() } as Tag, ...previousData.items],
+          total: previousData.total + 1,
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.create || '创建成功');
@@ -72,7 +85,10 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
       refreshData();
       await onSuccess?.create?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.create || error.message || '创建失败');
       }
@@ -81,6 +97,19 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateTagDto }) => tagsApi.updateTag(id, data),
+    onMutate: async ({ id, data: updateData }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Tag>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Tag>>(queryKey, {
+          ...previousData,
+          items: previousData.items.map((item) =>
+            item.id === id ? { ...item, ...updateData } : item
+          ),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.update || '更新成功');
@@ -88,7 +117,10 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
       refreshData();
       await onSuccess?.update?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.update || error.message || '更新失败');
       }
@@ -97,6 +129,18 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
 
   const deleteMutation = useMutation({
     mutationFn: tagsApi.deleteTag,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Tag>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Tag>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => item.id !== id),
+          total: Math.max(0, previousData.total - 1),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, id) => {
       if (showSuccessMessage) {
         message.success(successMessages.delete || '删除成功');
@@ -104,7 +148,10 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
       refreshData();
       await onSuccess?.delete?.(id);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.delete || error.message || '删除失败');
       }
@@ -115,6 +162,19 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
     mutationFn: async (ids: (string | number)[]) => {
       await Promise.all(ids.map((id) => tagsApi.deleteTag(String(id))));
     },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Tag>>(queryKey);
+      if (previousData) {
+        const idSet = new Set(ids.map((id) => String(id)));
+        queryClient.setQueryData<PaginatedResponse<Tag>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => !idSet.has(item.id)),
+          total: Math.max(0, previousData.total - ids.length),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, ids) => {
       if (showSuccessMessage) {
         message.success(successMessages.batchDelete || '批量删除成功');
@@ -122,7 +182,10 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
       refreshData();
       await onSuccess?.batchDelete?.(ids);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.batchDelete || error.message || '批量删除失败');
       }
@@ -133,21 +196,21 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
     async (data: CreateTagDto): Promise<Tag> => {
       return createMutation.mutateAsync(data);
     },
-    [createMutation],
+    [createMutation]
   );
 
   const update = useCallback(
     async (id: string, data: UpdateTagDto): Promise<Tag> => {
       return updateMutation.mutateAsync({ id, data });
     },
-    [updateMutation],
+    [updateMutation]
   );
 
   const deleteItem = useCallback(
     async (id: string): Promise<void> => {
       return deleteMutation.mutateAsync(id);
     },
-    [deleteMutation],
+    [deleteMutation]
   );
 
   const batchDelete = useCallback(
@@ -158,7 +221,7 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
       }
       return batchDeleteMutation.mutateAsync(ids);
     },
-    [batchDeleteMutation],
+    [batchDeleteMutation]
   );
 
   return {
@@ -172,4 +235,3 @@ export function useTagsMutation(options: UseTagsMutationOptions = {}): UseTagsMu
     batchDelete,
   };
 }
-

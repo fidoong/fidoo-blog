@@ -4,6 +4,7 @@
 
 import { apiClient } from './client';
 import type { User } from '@/store/auth';
+import type { MenuItem } from '@/types/menu';
 
 export interface LoginDto {
   username: string;
@@ -46,8 +47,8 @@ export const authApi = {
   },
 
   // 获取用户菜单列表
-  getMenus: async (): Promise<any[]> => {
-    return apiClient.get<any[]>('/auth/menus');
+  getMenus: async (): Promise<MenuItem[]> => {
+    return apiClient.get<MenuItem[]>('/auth/menus');
   },
 
   // 登出

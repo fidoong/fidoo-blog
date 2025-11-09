@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export interface Category {
   id: string;
@@ -51,17 +52,11 @@ export interface QueryCategoryDto {
   isActive?: boolean;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const categoriesApi = {
   // 获取分类列表
-  getCategories: async (params?: QueryCategoryDto): Promise<PaginatedResponse<Category> | Category[]> => {
+  getCategories: async (
+    params?: QueryCategoryDto
+  ): Promise<PaginatedResponse<Category> | Category[]> => {
     return apiClient.get<PaginatedResponse<Category> | Category[]>('/categories', { params });
   },
 
@@ -90,4 +85,3 @@ export const categoriesApi = {
     return apiClient.post<void>(`/categories/${id}/delete`);
   },
 };
-

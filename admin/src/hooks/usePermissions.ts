@@ -43,9 +43,15 @@ export interface PermissionProps {
 /**
  * 权限控制组件
  */
-export function Permission({ permission, permissions, mode = 'any', fallback = null, children }: PermissionProps) {
+export function Permission({
+  permission,
+  permissions,
+  mode = 'any',
+  fallback = null,
+  children,
+}: PermissionProps) {
   const userPermissions = useAuthStore((state) => state.permissions);
-  
+
   let hasPermission = false;
 
   if (permission) {
@@ -64,7 +70,6 @@ export function Permission({ permission, permissions, mode = 'any', fallback = n
     }
     return React.createElement(React.Fragment, null, children);
   }
-  
+
   return React.createElement(React.Fragment, null, fallback);
 }
-

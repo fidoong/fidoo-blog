@@ -72,7 +72,7 @@ export interface UseTableSelectionReturn<T> {
  * 提供行选择、批量操作等功能
  */
 export function useTableSelection<T = unknown>(
-  options: UseTableSelectionOptions<T> = {},
+  options: UseTableSelectionOptions<T> = {}
 ): UseTableSelectionReturn<T> {
   const {
     rowKey = 'id',
@@ -92,20 +92,20 @@ export function useTableSelection<T = unknown>(
       }
       return (record as Record<string, unknown>)[rowKey] as string | number;
     },
-    [rowKey],
+    [rowKey]
   );
 
   // 处理选择变化
   const handleChange = useCallback(
     (keys: Key[], rows: T[]) => {
       const stringOrNumberKeys = keys.map((key) =>
-        typeof key === 'bigint' ? String(key) : key,
+        typeof key === 'bigint' ? String(key) : key
       ) as (string | number)[];
       setSelectedRowKeys(stringOrNumberKeys);
       setSelectedRows(rows);
       onChangeCallback?.(stringOrNumberKeys, rows);
     },
-    [onChangeCallback],
+    [onChangeCallback]
   );
 
   // 清空选择
@@ -122,7 +122,7 @@ export function useTableSelection<T = unknown>(
       setSelectedRows(dataSource);
       onChangeCallback?.(allKeys, dataSource);
     },
-    [getRowKey, onChangeCallback],
+    [getRowKey, onChangeCallback]
   );
 
   // Ant Design 行选择配置
@@ -146,7 +146,7 @@ export function useTableSelection<T = unknown>(
       },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [type, selectedRowKeys, handleChange, getCheckboxProps, getRowKey],
+    [type, selectedRowKeys, handleChange, getCheckboxProps, getRowKey]
   );
 
   return {

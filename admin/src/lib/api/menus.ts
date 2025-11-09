@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export enum MenuType {
   MENU = 'menu',
@@ -86,14 +87,6 @@ export interface QueryMenuDto {
   parentId?: string;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const menusApi = {
   // 获取菜单列表
   getMenus: async (params?: QueryMenuDto): Promise<PaginatedResponse<Menu> | Menu[]> => {
@@ -125,4 +118,3 @@ export const menusApi = {
     return apiClient.delete<void>(`/menus/${id}`);
   },
 };
-

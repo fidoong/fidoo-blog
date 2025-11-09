@@ -8,7 +8,18 @@
 export interface FieldConfig {
   name: string;
   label: string;
-  type: 'input' | 'textarea' | 'number' | 'select' | 'date' | 'dateRange' | 'switch' | 'upload' | 'editor' | 'treeSelect' | 'cascader';
+  type:
+    | 'input'
+    | 'textarea'
+    | 'number'
+    | 'select'
+    | 'date'
+    | 'dateRange'
+    | 'switch'
+    | 'upload'
+    | 'editor'
+    | 'treeSelect'
+    | 'cascader';
   required?: boolean;
   placeholder?: string;
   defaultValue?: any;
@@ -63,19 +74,23 @@ export interface TableColumnConfig {
 export interface TableSchemaConfig {
   columns: TableColumnConfig[];
   rowKey?: string;
-  pagination?: boolean | {
-    pageSize?: number;
-    showSizeChanger?: boolean;
-    showQuickJumper?: boolean;
-  };
+  pagination?:
+    | boolean
+    | {
+        pageSize?: number;
+        showSizeChanger?: boolean;
+        showQuickJumper?: boolean;
+      };
   scroll?: {
     x?: number | string;
     y?: number | string;
   };
-  rowSelection?: boolean | {
-    type?: 'checkbox' | 'radio';
-    onChange?: (selectedRowKeys: any[], selectedRows: any[]) => void;
-  };
+  rowSelection?:
+    | boolean
+    | {
+        type?: 'checkbox' | 'radio';
+        onChange?: (selectedRowKeys: any[], selectedRows: any[]) => void;
+      };
 }
 
 /**
@@ -95,4 +110,3 @@ export interface PageSchemaConfig {
     onClick?: (record?: any) => void | Promise<void>;
   }>;
 }
-

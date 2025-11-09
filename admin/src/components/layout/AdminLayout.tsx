@@ -12,213 +12,14 @@ import {
   UserOutlined,
   LogoutOutlined,
   SettingOutlined,
-  DashboardOutlined,
-  TeamOutlined,
-  SafetyOutlined,
-  MenuOutlined,
-  LockOutlined,
-  AppstoreOutlined,
-  FileOutlined,
-  FileTextOutlined,
-  TagsOutlined,
-  CommentOutlined,
-  DatabaseOutlined,
-  ApiOutlined,
-  KeyOutlined,
-  UserSwitchOutlined,
-  HomeOutlined,
-  FolderOutlined,
-  BookOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-  SearchOutlined,
-  ReloadOutlined,
-  ExportOutlined,
-  ImportOutlined,
-  DownloadOutlined,
-  UploadOutlined,
-  EyeOutlined,
-  EyeInvisibleOutlined,
-  CheckOutlined,
-  CloseOutlined,
-  InfoCircleOutlined,
-  WarningOutlined,
-  QuestionCircleOutlined,
-  BellOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  GlobalOutlined,
-  LinkOutlined,
-  ShareAltOutlined,
-  StarOutlined,
-  HeartOutlined,
-  LikeOutlined,
-  DislikeOutlined,
-  FireOutlined,
-  ThunderboltOutlined,
-  RocketOutlined,
-  CrownOutlined,
-  TrophyOutlined,
-  GiftOutlined,
-  ShoppingOutlined,
-  ShopOutlined,
-  BankOutlined,
-  WalletOutlined,
-  CreditCardOutlined,
-  DollarOutlined,
-  CalculatorOutlined,
-  BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
-  AreaChartOutlined,
-  TableOutlined,
-  UnorderedListOutlined,
-  OrderedListOutlined,
-  BorderOutlined,
-  BorderInnerOutlined,
-  BorderTopOutlined,
-  BorderBottomOutlined,
-  BorderLeftOutlined,
-  BorderRightOutlined,
-  BorderVerticleOutlined,
-  BorderHorizontalOutlined,
-  BorderOuterOutlined,
-  RadiusUpleftOutlined,
-  RadiusUprightOutlined,
-  RadiusBottomleftOutlined,
-  RadiusBottomrightOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { authApi } from '@/lib/api/auth';
 import { Breadcrumb } from './Breadcrumb';
+import { getMenuIcon } from './iconMap';
 import type { MenuProps } from 'antd';
-
-// 图标映射表：将字符串映射到 Ant Design 图标组件
-const iconMap: Record<string, React.ReactNode> = {
-  // 基础图标
-  DashboardOutlined: <DashboardOutlined />,
-  UserOutlined: <UserOutlined />,
-  TeamOutlined: <TeamOutlined />,
-  SafetyOutlined: <SafetyOutlined />,
-  MenuOutlined: <MenuOutlined />,
-  LockOutlined: <LockOutlined />,
-  AppstoreOutlined: <AppstoreOutlined />,
-  FileOutlined: <FileOutlined />,
-  FileTextOutlined: <FileTextOutlined />,
-  TagsOutlined: <TagsOutlined />,
-  CommentOutlined: <CommentOutlined />,
-  DatabaseOutlined: <DatabaseOutlined />,
-  ApiOutlined: <ApiOutlined />,
-  KeyOutlined: <KeyOutlined />,
-  UserSwitchOutlined: <UserSwitchOutlined />,
-  HomeOutlined: <HomeOutlined />,
-  FolderOutlined: <FolderOutlined />,
-  BookOutlined: <BookOutlined />,
-  SettingOutlined: <SettingOutlined />,
-  
-  // 操作图标
-  EditOutlined: <EditOutlined />,
-  DeleteOutlined: <DeleteOutlined />,
-  PlusOutlined: <PlusOutlined />,
-  SearchOutlined: <SearchOutlined />,
-  ReloadOutlined: <ReloadOutlined />,
-  ExportOutlined: <ExportOutlined />,
-  ImportOutlined: <ImportOutlined />,
-  DownloadOutlined: <DownloadOutlined />,
-  UploadOutlined: <UploadOutlined />,
-  EyeOutlined: <EyeOutlined />,
-  EyeInvisibleOutlined: <EyeInvisibleOutlined />,
-  CheckOutlined: <CheckOutlined />,
-  CloseOutlined: <CloseOutlined />,
-  
-  // 提示图标
-  InfoCircleOutlined: <InfoCircleOutlined />,
-  WarningOutlined: <WarningOutlined />,
-  QuestionCircleOutlined: <QuestionCircleOutlined />,
-  
-  // 通知图标
-  BellOutlined: <BellOutlined />,
-  MailOutlined: <MailOutlined />,
-  PhoneOutlined: <PhoneOutlined />,
-  
-  // 网络图标
-  GlobalOutlined: <GlobalOutlined />,
-  LinkOutlined: <LinkOutlined />,
-  ShareAltOutlined: <ShareAltOutlined />,
-  
-  // 社交图标
-  StarOutlined: <StarOutlined />,
-  HeartOutlined: <HeartOutlined />,
-  LikeOutlined: <LikeOutlined />,
-  DislikeOutlined: <DislikeOutlined />,
-  FireOutlined: <FireOutlined />,
-  ThunderboltOutlined: <ThunderboltOutlined />,
-  RocketOutlined: <RocketOutlined />,
-  CrownOutlined: <CrownOutlined />,
-  TrophyOutlined: <TrophyOutlined />,
-  GiftOutlined: <GiftOutlined />,
-  
-  // 商业图标
-  ShoppingOutlined: <ShoppingOutlined />,
-  ShopOutlined: <ShopOutlined />,
-  BankOutlined: <BankOutlined />,
-  WalletOutlined: <WalletOutlined />,
-  CreditCardOutlined: <CreditCardOutlined />,
-  DollarOutlined: <DollarOutlined />,
-  CalculatorOutlined: <CalculatorOutlined />,
-  
-  // 图表图标
-  BarChartOutlined: <BarChartOutlined />,
-  LineChartOutlined: <LineChartOutlined />,
-  PieChartOutlined: <PieChartOutlined />,
-  AreaChartOutlined: <AreaChartOutlined />,
-  
-  // 列表图标
-  TableOutlined: <TableOutlined />,
-  UnorderedListOutlined: <UnorderedListOutlined />,
-  OrderedListOutlined: <OrderedListOutlined />,
-  
-  // 边框图标
-  BorderOutlined: <BorderOutlined />,
-  BorderInnerOutlined: <BorderInnerOutlined />,
-  BorderTopOutlined: <BorderTopOutlined />,
-  BorderBottomOutlined: <BorderBottomOutlined />,
-  BorderLeftOutlined: <BorderLeftOutlined />,
-  BorderRightOutlined: <BorderRightOutlined />,
-  BorderVerticleOutlined: <BorderVerticleOutlined />,
-  BorderHorizontalOutlined: <BorderHorizontalOutlined />,
-  BorderOuterOutlined: <BorderOuterOutlined />,
-  RadiusUpleftOutlined: <RadiusUpleftOutlined />,
-  RadiusUprightOutlined: <RadiusUprightOutlined />,
-  RadiusBottomleftOutlined: <RadiusBottomleftOutlined />,
-  RadiusBottomrightOutlined: <RadiusBottomrightOutlined />,
-};
-
-/**
- * 根据图标名称获取图标组件
- * @param iconName 图标名称（如 "UserOutlined"）或 CSS 类名（如 "icon-user"）
- * @returns React 节点
- */
-function getMenuIcon(iconName?: string): React.ReactNode | null {
-  if (!iconName) {
-    return null;
-  }
-  
-  // 如果是 Ant Design 图标名称，直接映射
-  if (iconMap[iconName]) {
-    return iconMap[iconName];
-  }
-  
-  // 如果是 CSS 类名（以 "icon-" 或 "fa " 等开头），使用 span 渲染
-  if (iconName.startsWith('icon-') || iconName.startsWith('fa ') || iconName.includes(' ')) {
-    return <span className={iconName} />;
-  }
-  
-  // 默认返回 null
-  return null;
-}
+import type { MenuItem } from '@/types/menu';
 
 const { Header, Sider, Content } = Layout;
 
@@ -234,11 +35,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const { user, menus, clearAuth } = useAuthStore();
 
   // 构建菜单项
-  const buildMenuItems = (menuList: any[]): MenuProps['items'] => {
+  const buildMenuItems = (menuList: MenuItem[]): MenuProps['items'] => {
     return menuList
       .filter((menu) => menu.status === 'enabled' && !menu.isHidden)
       .map((menu) => {
-        const item: any = {
+        const item: MenuProps['items'][0] = {
           key: menu.path || menu.id,
           icon: getMenuIcon(menu.icon),
           label: menu.title || menu.name,
@@ -393,4 +194,3 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     </Layout>
   );
 }
-

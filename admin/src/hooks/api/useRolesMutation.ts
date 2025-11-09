@@ -6,12 +6,8 @@
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import {
-  rolesApi,
-  type Role,
-  type CreateRoleDto,
-  type UpdateRoleDto,
-} from '@/lib/api/roles';
+import { rolesApi, type Role, type CreateRoleDto, type UpdateRoleDto } from '@/lib/api/roles';
+import type { PaginatedResponse } from '@/lib/api/types';
 
 /**
  * useRolesMutation 配置
@@ -119,11 +115,23 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
     } else {
       queryClient.invalidateQueries({ queryKey });
     }
-  }, [queryClient, refreshMode]);
+  }, [queryClient, queryKey, refreshMode]);
 
   // 创建
   const createMutation = useMutation({
     mutationFn: rolesApi.createRole,
+    onMutate: async (newRole) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Role>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Role>>(queryKey, {
+          ...previousData,
+          items: [{ ...newRole, id: 'temp-' + Date.now() } as Role, ...previousData.items],
+          total: previousData.total + 1,
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.create || '创建成功');
@@ -131,7 +139,10 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
       refreshData();
       await onSuccess?.create?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.create || error.message || '创建失败';
         message.error(errorMsg);
@@ -141,7 +152,21 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
 
   // 更新
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateRoleDto }) => rolesApi.updateRole(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateRoleDto }) =>
+      rolesApi.updateRole(id, data),
+    onMutate: async ({ id, data: updateData }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Role>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Role>>(queryKey, {
+          ...previousData,
+          items: previousData.items.map((item) =>
+            item.id === id ? { ...item, ...updateData } : item
+          ),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.update || '更新成功');
@@ -149,7 +174,10 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
       refreshData();
       await onSuccess?.update?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.update || error.message || '更新失败';
         message.error(errorMsg);
@@ -160,6 +188,18 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
   // 删除
   const deleteMutation = useMutation({
     mutationFn: rolesApi.deleteRole,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Role>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Role>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => item.id !== id),
+          total: Math.max(0, previousData.total - 1),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, id) => {
       if (showSuccessMessage) {
         message.success(successMessages.delete || '删除成功');
@@ -167,7 +207,10 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
       refreshData();
       await onSuccess?.delete?.(id);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.delete || error.message || '删除失败';
         message.error(errorMsg);
@@ -180,6 +223,19 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
     mutationFn: async (ids: (string | number)[]) => {
       await Promise.all(ids.map((id) => rolesApi.deleteRole(String(id))));
     },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Role>>(queryKey);
+      if (previousData) {
+        const idSet = new Set(ids.map((id) => String(id)));
+        queryClient.setQueryData<PaginatedResponse<Role>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => !idSet.has(item.id)),
+          total: Math.max(0, previousData.total - ids.length),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, ids) => {
       if (showSuccessMessage) {
         message.success(successMessages.batchDelete || '批量删除成功');
@@ -187,7 +243,10 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
       refreshData();
       await onSuccess?.batchDelete?.(ids);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.batchDelete || error.message || '批量删除失败';
         message.error(errorMsg);
@@ -200,7 +259,7 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
     async (data: CreateRoleDto): Promise<Role> => {
       return createMutation.mutateAsync(data);
     },
-    [createMutation],
+    [createMutation]
   );
 
   // 更新（包装函数）
@@ -208,7 +267,7 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
     async (id: string, data: UpdateRoleDto): Promise<Role> => {
       return updateMutation.mutateAsync({ id, data });
     },
-    [updateMutation],
+    [updateMutation]
   );
 
   // 删除
@@ -216,7 +275,7 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
     async (id: string): Promise<void> => {
       return deleteMutation.mutateAsync(id);
     },
-    [deleteMutation],
+    [deleteMutation]
   );
 
   // 批量删除
@@ -228,7 +287,7 @@ export function useRolesMutation(options: UseRolesMutationOptions = {}): UseRole
       }
       return batchDeleteMutation.mutateAsync(ids);
     },
-    [batchDeleteMutation],
+    [batchDeleteMutation]
   );
 
   return {

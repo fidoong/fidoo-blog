@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setPermissions(permissions);
           setMenus(menus);
         } catch (error) {
+          // 静默处理错误，不显示错误提示（避免在页面加载时弹出错误）
           console.error('恢复认证状态失败:', error);
           // Token 可能已过期，清除认证信息
           useAuthStore.getState().clearAuth();
@@ -49,4 +50,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-

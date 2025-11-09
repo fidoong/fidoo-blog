@@ -10,6 +10,7 @@ import {
   Res,
   Req,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -19,9 +20,12 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { User } from '@/modules/users/entities/user.entity';
+import { BusinessException } from '@/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '@/modules/users/users.service';
+import { DeviceService } from './services/device.service';
+import { ExtractJwt } from 'passport-jwt';
 import type { Response, Request } from 'express';
 
 @ApiTags('auth')
@@ -31,6 +35,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
+    private readonly deviceService: DeviceService,
   ) {}
 
   @Public()
@@ -46,8 +51,23 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '用户登录' })
   @ApiBody({ type: LoginDto })
-  async login(@Body() loginDto: LoginDto, @Ip() ip: string) {
-    return this.authService.login({ ...loginDto, ip });
+  async login(
+    @Body() loginDto: LoginDto,
+    @Ip() ip: string,
+    @Req() req: Request,
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    // 生成设备信息
+    const deviceInfo = userAgent
+      ? {
+          deviceId: this.deviceService.generateDeviceId(userAgent, ip),
+          ...this.deviceService.parseDeviceInfo(userAgent),
+          userAgent,
+          ipAddress: ip,
+        }
+      : undefined;
+
+    return this.authService.login({ ...loginDto, ip, deviceInfo });
   }
 
   @Public()
@@ -84,10 +104,62 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '用户登出' })
-  async logout() {
+  async logout(
+    @Req() req: Request,
+    @CurrentUser() user: User,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    // 获取 token
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    if (token) {
+      await this.authService.logout(token, user.id, ip, userAgent);
+    }
     return {
       message: '登出成功',
     };
+  }
+
+  @Get('devices')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '获取当前用户的设备列表' })
+  async getDevices(@CurrentUser() user: User) {
+    return await this.deviceService.getUserDevices(user.id);
+  }
+
+  @Post('devices/:deviceId/deactivate')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '停用设备' })
+  async deactivateDevice(@CurrentUser() user: User, @Query('deviceId') deviceId: string) {
+    const success = await this.deviceService.deactivateDevice(user.id, deviceId);
+    if (!success) {
+      throw BusinessException.notFound('设备不存在');
+    }
+    return { message: '设备已停用' };
+  }
+
+  @Post('devices/:deviceId/delete')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '删除设备' })
+  async deleteDevice(@CurrentUser() user: User, @Query('deviceId') deviceId: string) {
+    const success = await this.deviceService.deleteDevice(user.id, deviceId);
+    if (!success) {
+      throw BusinessException.notFound('设备不存在');
+    }
+    return { message: '设备已删除' };
+  }
+
+  @Post('force-logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '强制登出（撤销所有 token）' })
+  async forceLogout(@CurrentUser() user: User, @Body('targetUserId') targetUserId?: string) {
+    // 如果提供了 targetUserId，说明是管理员强制登出其他用户
+    const userId = targetUserId || user.id;
+    await this.authService.forceLogout(userId, user.id, user.username);
+    return { message: '已强制登出所有设备' };
   }
 
   // ========== OAuth 授权 ==========

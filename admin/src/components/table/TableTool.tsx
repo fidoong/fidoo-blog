@@ -190,13 +190,7 @@ function renderButton(config: TableToolButtonConfig): React.ReactNode {
 /**
  * 表格工具栏组件
  */
-export function TableTool({
-  config,
-  actions,
-  children,
-  alignRight = true,
-  style,
-}: TableToolProps) {
+export function TableTool({ config, actions, children, alignRight = true, style }: TableToolProps) {
   // 优先使用配置化方式
   if (config) {
     const { actions: configActions, alignRight: configAlignRight, style: configStyle } = config;
@@ -220,10 +214,9 @@ export function TableTool({
         }}
       >
         {children ||
-          (configActions &&
-            configActions.length > 0 && (
-              <Space>{configActions.map((action) => renderButton(action))}</Space>
-            ))}
+          (configActions && configActions.length > 0 && (
+            <Space>{configActions.map((action) => renderButton(action))}</Space>
+          ))}
       </div>
     );
   }

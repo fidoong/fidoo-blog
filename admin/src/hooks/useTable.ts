@@ -144,7 +144,7 @@ export interface UseTableReturn<T, Q extends TableQueryParams = TableQueryParams
  * ```
  */
 export function useTable<T, Q extends TableQueryParams = TableQueryParams>(
-  options: UseTableOptions<T, Q>,
+  options: UseTableOptions<T, Q>
 ): UseTableReturn<T, Q> {
   const {
     queryKey,
@@ -166,7 +166,7 @@ export function useTable<T, Q extends TableQueryParams = TableQueryParams>(
         page: pagination.current,
         pageSize: pagination.pageSize,
         ...initialParams,
-      }) as Q,
+      }) as Q
   );
 
   const queryClient = useQueryClient();
@@ -179,7 +179,7 @@ export function useTable<T, Q extends TableQueryParams = TableQueryParams>(
       pageSize: pagination.pageSize,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [params, pagination.current, pagination.pageSize],
+    [params, pagination.current, pagination.pageSize]
   );
 
   // 数据查询：使用 React Query 的 useQuery
@@ -223,7 +223,7 @@ export function useTable<T, Q extends TableQueryParams = TableQueryParams>(
           page: 1,
           pageSize: pagination.pageSize,
           ...initialParams,
-        }) as Q,
+        }) as Q
     );
     setPagination((p) => ({ ...p, current: 1 }));
   }, [initialParams, pagination.pageSize]);
@@ -256,7 +256,7 @@ export function useTable<T, Q extends TableQueryParams = TableQueryParams>(
       },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pagination.current, pagination.pageSize, pagination.total, total],
+    [pagination.current, pagination.pageSize, pagination.total, total]
   );
 
   // 更新总数

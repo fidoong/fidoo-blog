@@ -11,6 +11,7 @@ import {
   type CreateCommentDto,
   type UpdateCommentDto,
 } from '@/lib/api/comments';
+import type { PaginatedResponse } from '@/lib/api/types';
 
 export interface UseCommentsMutationOptions {
   successMessages?: {
@@ -41,7 +42,9 @@ export interface UseCommentsMutationOptions {
 
 export interface UseCommentsMutationReturn {
   createMutation: ReturnType<typeof useMutation<Comment, Error, CreateCommentDto>>;
-  updateMutation: ReturnType<typeof useMutation<Comment, Error, { id: string; data: UpdateCommentDto }>>;
+  updateMutation: ReturnType<
+    typeof useMutation<Comment, Error, { id: string; data: UpdateCommentDto }>
+  >;
   deleteMutation: ReturnType<typeof useMutation<void, Error, string>>;
   approveMutation: ReturnType<typeof useMutation<void, Error, string>>;
   rejectMutation: ReturnType<typeof useMutation<void, Error, string>>;
@@ -53,7 +56,7 @@ export interface UseCommentsMutationReturn {
 }
 
 export function useCommentsMutation(
-  options: UseCommentsMutationOptions = {},
+  options: UseCommentsMutationOptions = {}
 ): UseCommentsMutationReturn {
   const {
     successMessages = {},
@@ -77,6 +80,18 @@ export function useCommentsMutation(
 
   const createMutation = useMutation({
     mutationFn: commentsApi.createComment,
+    onMutate: async (newComment) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Comment>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Comment>>(queryKey, {
+          ...previousData,
+          items: [{ ...newComment, id: 'temp-' + Date.now() } as Comment, ...previousData.items],
+          total: previousData.total + 1,
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.create || '创建成功');
@@ -84,7 +99,10 @@ export function useCommentsMutation(
       refreshData();
       await onSuccess?.create?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.create || error.message || '创建失败');
       }
@@ -94,6 +112,19 @@ export function useCommentsMutation(
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateCommentDto }) =>
       commentsApi.updateComment(id, data),
+    onMutate: async ({ id, data: updateData }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Comment>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Comment>>(queryKey, {
+          ...previousData,
+          items: previousData.items.map((item) =>
+            item.id === id ? { ...item, ...updateData } : item
+          ),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.update || '更新成功');
@@ -101,7 +132,10 @@ export function useCommentsMutation(
       refreshData();
       await onSuccess?.update?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.update || error.message || '更新失败');
       }
@@ -110,6 +144,18 @@ export function useCommentsMutation(
 
   const deleteMutation = useMutation({
     mutationFn: commentsApi.deleteComment,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Comment>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Comment>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => item.id !== id),
+          total: Math.max(0, previousData.total - 1),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, id) => {
       if (showSuccessMessage) {
         message.success(successMessages.delete || '删除成功');
@@ -117,7 +163,10 @@ export function useCommentsMutation(
       refreshData();
       await onSuccess?.delete?.(id);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.delete || error.message || '删除失败');
       }
@@ -126,6 +175,19 @@ export function useCommentsMutation(
 
   const approveMutation = useMutation({
     mutationFn: commentsApi.approveComment,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Comment>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Comment>>(queryKey, {
+          ...previousData,
+          items: previousData.items.map((item) =>
+            item.id === id ? { ...item, status: 'approved' as const } : item
+          ),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, id) => {
       if (showSuccessMessage) {
         message.success(successMessages.approve || '审核通过');
@@ -133,7 +195,10 @@ export function useCommentsMutation(
       refreshData();
       await onSuccess?.approve?.(id);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.approve || error.message || '操作失败');
       }
@@ -142,6 +207,19 @@ export function useCommentsMutation(
 
   const rejectMutation = useMutation({
     mutationFn: commentsApi.rejectComment,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Comment>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Comment>>(queryKey, {
+          ...previousData,
+          items: previousData.items.map((item) =>
+            item.id === id ? { ...item, status: 'rejected' as const } : item
+          ),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, id) => {
       if (showSuccessMessage) {
         message.success(successMessages.reject || '已拒绝');
@@ -149,7 +227,10 @@ export function useCommentsMutation(
       refreshData();
       await onSuccess?.reject?.(id);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.reject || error.message || '操作失败');
       }
@@ -160,35 +241,35 @@ export function useCommentsMutation(
     async (data: CreateCommentDto): Promise<Comment> => {
       return createMutation.mutateAsync(data);
     },
-    [createMutation],
+    [createMutation]
   );
 
   const update = useCallback(
     async (id: string, data: UpdateCommentDto): Promise<Comment> => {
       return updateMutation.mutateAsync({ id, data });
     },
-    [updateMutation],
+    [updateMutation]
   );
 
   const deleteItem = useCallback(
     async (id: string): Promise<void> => {
       return deleteMutation.mutateAsync(id);
     },
-    [deleteMutation],
+    [deleteMutation]
   );
 
   const approve = useCallback(
     async (id: string): Promise<void> => {
       return approveMutation.mutateAsync(id);
     },
-    [approveMutation],
+    [approveMutation]
   );
 
   const reject = useCallback(
     async (id: string): Promise<void> => {
       return rejectMutation.mutateAsync(id);
     },
-    [rejectMutation],
+    [rejectMutation]
   );
 
   return {
@@ -204,4 +285,3 @@ export function useCommentsMutation(
     reject,
   };
 }
-

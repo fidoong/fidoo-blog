@@ -38,6 +38,7 @@ import { PermissionsModule } from '@/modules/permissions/permissions.module';
 import { RolesModule } from '@/modules/roles/roles.module';
 import { UserRolesModule } from '@/modules/user-roles/user-roles.module';
 import { DictionariesModule } from '@/modules/dictionaries/dictionaries.module';
+import { AuditLogsModule } from '@/modules/audit-logs/audit-logs.module';
 
 // 健康检查
 import { AppController } from './app.controller';
@@ -147,6 +148,7 @@ import { AppService } from './app.service';
     RolesModule,
     UserRolesModule,
     DictionariesModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

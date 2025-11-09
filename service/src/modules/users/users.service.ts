@@ -218,6 +218,15 @@ export class UsersService {
     });
   }
 
+  /**
+   * 根据角色查找用户
+   */
+  async findByRole(role: string): Promise<User[]> {
+    return this.usersRepository.find({
+      where: { role: role as any },
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findById(id);
 

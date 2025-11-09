@@ -81,7 +81,7 @@ export interface FormDialogButtonConfig {
   onClick: (
     form: Form,
     close: (result?: unknown) => void,
-    setLoading: (loading: boolean) => void,
+    setLoading: (loading: boolean) => void
   ) => void | Promise<void>;
 }
 
@@ -121,7 +121,7 @@ export interface FormDialogConfig extends FormSchemaConfig {
     | ((
         form: Form,
         close: (result?: unknown) => void,
-        setLoading: (loading: boolean) => void,
+        setLoading: (loading: boolean) => void
       ) => React.ReactNode);
   /**
    * 默认按钮配置（仅在未提供 buttons 和 footer 时使用）
@@ -279,7 +279,7 @@ function FormDialogItem({
   const schema = React.useMemo(
     () => buildFormSchema(dialog.config, dialog.config.initialValues || {}),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dialog.config],
+    [dialog.config]
   );
 
   // 关闭弹窗的包装函数
@@ -287,7 +287,7 @@ function FormDialogItem({
     (result?: unknown) => {
       onClose(result);
     },
-    [onClose],
+    [onClose]
   );
 
   // 渲染 Footer
@@ -443,6 +443,6 @@ export function showFormDialog(config: FormDialogConfig): Promise<unknown> {
   }
 
   throw new Error(
-    'showFormDialog 必须在 FormDialogProvider 内部使用。请确保在根布局中添加了 <FormDialogProvider>',
+    'showFormDialog 必须在 FormDialogProvider 内部使用。请确保在根布局中添加了 <FormDialogProvider>'
   );
 }

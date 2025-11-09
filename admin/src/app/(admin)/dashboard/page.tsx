@@ -5,33 +5,40 @@
 'use client';
 
 import React from 'react';
-import { Card, Row, Col, Statistic } from 'antd';
+import { Row, Col } from 'antd';
 import { UserOutlined, FileTextOutlined, TagsOutlined, CommentOutlined } from '@ant-design/icons';
+import { StatsCard } from '@/components/dashboard/StatsCard';
+
+// 懒加载图表组件（如果将来需要）
+// const DashboardChart = dynamic(() => import('@/components/dashboard/DashboardChart'), {
+//   loading: () => <Skeleton active />,
+//   ssr: false,
+// });
 
 export default function DashboardPage() {
+  // TODO: 从 API 获取统计数据
+  const stats = {
+    users: 1128,
+    posts: 1128,
+    tags: 1128,
+    comments: 1128,
+  };
+
   return (
     <div>
       <h1 style={{ marginBottom: 24 }}>仪表盘</h1>
       <Row gutter={16}>
-        <Col span={6}>
-          <Card>
-            <Statistic title="用户总数" value={1128} prefix={<UserOutlined />} />
-          </Card>
+        <Col xs={24} sm={12} lg={6}>
+          <StatsCard title="用户总数" value={stats.users} prefix={<UserOutlined />} />
         </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="文章总数" value={1128} prefix={<FileTextOutlined />} />
-          </Card>
+        <Col xs={24} sm={12} lg={6}>
+          <StatsCard title="文章总数" value={stats.posts} prefix={<FileTextOutlined />} />
         </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="标签总数" value={1128} prefix={<TagsOutlined />} />
-          </Card>
+        <Col xs={24} sm={12} lg={6}>
+          <StatsCard title="标签总数" value={stats.tags} prefix={<TagsOutlined />} />
         </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="评论总数" value={1128} prefix={<CommentOutlined />} />
-          </Card>
+        <Col xs={24} sm={12} lg={6}>
+          <StatsCard title="评论总数" value={stats.comments} prefix={<CommentOutlined />} />
         </Col>
       </Row>
     </div>

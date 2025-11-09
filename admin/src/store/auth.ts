@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { MenuItem } from '@/types/menu';
 
 export interface User {
   id: string;
@@ -19,11 +20,11 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   permissions: string[];
-  menus: any[];
+  menus: MenuItem[];
   _hasHydrated: boolean;
   setAuth: (user: User, accessToken: string, refreshToken: string) => void;
   setPermissions: (permissions: string[]) => void;
-  setMenus: (menus: any[]) => void;
+  setMenus: (menus: MenuItem[]) => void;
   clearAuth: () => void;
   setHasHydrated: (state: boolean) => void;
 }
@@ -37,8 +38,7 @@ export const useAuthStore = create<AuthState>()(
       permissions: [],
       menus: [],
       _hasHydrated: false,
-      setAuth: (user, accessToken, refreshToken) =>
-        set({ user, accessToken, refreshToken }),
+      setAuth: (user, accessToken, refreshToken) => set({ user, accessToken, refreshToken }),
       setPermissions: (permissions) => set({ permissions }),
       setMenus: (menus) => set({ menus }),
       clearAuth: () =>
@@ -67,7 +67,6 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
-    },
-  ),
+    }
+  )
 );
-

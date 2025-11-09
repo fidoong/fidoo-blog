@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export interface Tag {
   id: string;
@@ -36,14 +37,6 @@ export interface QueryTagDto {
   categoryId?: string;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const tagsApi = {
   // 获取标签列表
   getTags: async (params?: QueryTagDto): Promise<PaginatedResponse<Tag> | Tag[]> => {
@@ -70,4 +63,3 @@ export const tagsApi = {
     return apiClient.post<void>(`/tags/${id}/delete`);
   },
 };
-

@@ -10,6 +10,7 @@ import { Spin } from 'antd';
 import { useAuthStore } from '@/store/auth';
 import { authApi } from '@/lib/api/auth';
 import { Permission } from '@/hooks/usePermissions';
+import { useErrorHandler } from '@/hooks';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -30,6 +31,7 @@ export function ProtectedRoute({
   const { user, accessToken, setPermissions, setMenus, _hasHydrated } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const { handleError } = useErrorHandler();
 
   useEffect(() => {
     // 等待 zustand persist 完成 hydration
@@ -62,7 +64,7 @@ export function ProtectedRoute({
           setPermissions(permissionsData);
           setMenus(menusData);
         } catch (error) {
-          console.error('获取用户信息失败:', error);
+          handleError(error, '获取用户信息失败');
           // Token 可能已过期，清除认证信息并跳转登录
           useAuthStore.getState().clearAuth();
           router.push(redirectTo);
@@ -77,12 +79,20 @@ export function ProtectedRoute({
     if (!initialized) {
       checkAuth();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_hasHydrated, accessToken, user, router, redirectTo, setPermissions, setMenus, initialized]);
 
   // 等待 hydration 完成
   if (!_hasHydrated || loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+        }}
+      >
         <Spin size="large" />
       </div>
     );
@@ -99,4 +109,3 @@ export function ProtectedRoute({
 
   return <>{children}</>;
 }
-

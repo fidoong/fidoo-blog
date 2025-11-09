@@ -145,11 +145,5 @@ export function Breadcrumb({ menus = [], items, showHome = true }: BreadcrumbPro
     };
   });
 
-  return (
-    <AntBreadcrumb
-      items={antBreadcrumbItems}
-      separator="/"
-    />
-  );
+  return <AntBreadcrumb items={antBreadcrumbItems} separator="/" />;
 }
-

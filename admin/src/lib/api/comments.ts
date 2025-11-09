@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export enum CommentStatus {
   PENDING = 'pending',
@@ -44,14 +45,6 @@ export interface QueryCommentDto {
   userId?: string;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const commentsApi = {
   // 获取评论列表
   getComments: async (params?: QueryCommentDto): Promise<PaginatedResponse<Comment>> => {
@@ -88,4 +81,3 @@ export const commentsApi = {
     return apiClient.post<void>(`/comments/${id}/reject`);
   },
 };
-

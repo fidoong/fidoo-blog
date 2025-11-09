@@ -12,6 +12,7 @@ import './globals.css';
 import { Providers } from './providers';
 import { FormDialogProvider } from '@/components/form/FormDialog';
 import { AuthProvider } from '@/components/auth/AuthProvider';
+import { ErrorBoundaryWrapper } from '@/components/error/ErrorBoundaryWrapper';
 
 dayjs.locale('zh-cn');
 
@@ -33,13 +34,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN">
       <body className={inter.variable} suppressHydrationWarning>
-        <ConfigProvider locale={zhCN}>
-          <Providers>
-            <FormDialogProvider>
-              <AuthProvider>{children}</AuthProvider>
-            </FormDialogProvider>
-          </Providers>
-        </ConfigProvider>
+        <ErrorBoundaryWrapper>
+          <ConfigProvider locale={zhCN}>
+            <Providers>
+              <FormDialogProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </FormDialogProvider>
+            </Providers>
+          </ConfigProvider>
+        </ErrorBoundaryWrapper>
       </body>
     </html>
   );

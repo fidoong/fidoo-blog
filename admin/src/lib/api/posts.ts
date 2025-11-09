@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export enum PostStatus {
   DRAFT = 'draft',
@@ -66,14 +67,6 @@ export interface QueryPostDto {
   isTop?: boolean;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const postsApi = {
   // 获取文章列表
   getPosts: async (params?: QueryPostDto): Promise<PaginatedResponse<Post>> => {
@@ -100,4 +93,3 @@ export const postsApi = {
     return apiClient.post<void>(`/posts/${id}/delete`);
   },
 };
-

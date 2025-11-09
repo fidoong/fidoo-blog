@@ -54,9 +54,7 @@ export interface UseTableDataReturn<T> {
  * 表格数据 Hook
  * 提供数据格式化、导出等功能
  */
-export function useTableData<T = unknown>(
-  options: UseTableDataOptions<T>,
-): UseTableDataReturn<T> {
+export function useTableData<T = unknown>(options: UseTableDataOptions<T>): UseTableDataReturn<T> {
   const { dataSource, enableExport = false, exportFileName = 'table-data' } = options;
 
   // 格式化数据
@@ -72,7 +70,7 @@ export function useTableData<T = unknown>(
 
     // 构建 CSV 头部
     const headers = columns.map((col) => col.title).join(',');
-    
+
     // 构建 CSV 数据行
     const rows = dataSource.map((item) => {
       return columns
@@ -123,7 +121,7 @@ export function useTableData<T = unknown>(
   // 导出数据
   const exportData = (
     format: ExportFormat,
-    columns?: Array<{ title: string; dataIndex: string }>,
+    columns?: Array<{ title: string; dataIndex: string }>
   ) => {
     if (!enableExport) {
       return;
@@ -156,4 +154,3 @@ export function useTableData<T = unknown>(
     exportData,
   };
 }
-

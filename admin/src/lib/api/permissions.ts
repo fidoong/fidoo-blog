@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export enum PermissionType {
   MENU = 'menu',
@@ -72,17 +73,11 @@ export interface QueryPermissionDto {
   status?: PermissionStatus;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const permissionsApi = {
   // 获取权限列表
-  getPermissions: async (params?: QueryPermissionDto): Promise<PaginatedResponse<Permission> | Permission[]> => {
+  getPermissions: async (
+    params?: QueryPermissionDto
+  ): Promise<PaginatedResponse<Permission> | Permission[]> => {
     return apiClient.get<PaginatedResponse<Permission> | Permission[]>('/permissions', { params });
   },
 
@@ -106,4 +101,3 @@ export const permissionsApi = {
     return apiClient.delete<void>(`/permissions/${id}`);
   },
 };
-

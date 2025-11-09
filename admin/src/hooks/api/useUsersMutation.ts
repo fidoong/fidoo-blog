@@ -7,6 +7,7 @@ import { useCallback, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { usersApi, type User, type CreateUserDto, type UpdateUserDto } from '@/lib/api/users';
+import type { PaginatedResponse } from '@/lib/api/types';
 
 /**
  * useUsersMutation 配置
@@ -119,6 +120,18 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
   // 创建
   const createMutation = useMutation({
     mutationFn: usersApi.createUser,
+    onMutate: async (newUser) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<User>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<User>>(queryKey, {
+          ...previousData,
+          items: [{ ...newUser, id: 'temp-' + Date.now() } as User, ...previousData.items],
+          total: previousData.total + 1,
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.create || '创建成功');
@@ -126,7 +139,10 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
       refreshData();
       await onSuccess?.create?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.create || error.message || '创建失败';
         message.error(errorMsg);
@@ -138,6 +154,19 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateUserDto }) =>
       usersApi.updateUser(id, data),
+    onMutate: async ({ id, data: updateData }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<User>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<User>>(queryKey, {
+          ...previousData,
+          items: previousData.items.map((item) =>
+            item.id === id ? { ...item, ...updateData } : item
+          ),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.update || '更新成功');
@@ -145,7 +174,10 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
       refreshData();
       await onSuccess?.update?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.update || error.message || '更新失败';
         message.error(errorMsg);
@@ -156,6 +188,18 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
   // 删除
   const deleteMutation = useMutation({
     mutationFn: usersApi.deleteUser,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<User>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<User>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => item.id !== id),
+          total: Math.max(0, previousData.total - 1),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, id) => {
       if (showSuccessMessage) {
         message.success(successMessages.delete || '删除成功');
@@ -163,7 +207,10 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
       refreshData();
       await onSuccess?.delete?.(id);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.delete || error.message || '删除失败';
         message.error(errorMsg);
@@ -176,6 +223,19 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
     mutationFn: async (ids: (string | number)[]) => {
       await Promise.all(ids.map((id) => usersApi.deleteUser(String(id))));
     },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<User>>(queryKey);
+      if (previousData) {
+        const idSet = new Set(ids.map((id) => String(id)));
+        queryClient.setQueryData<PaginatedResponse<User>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => !idSet.has(item.id)),
+          total: Math.max(0, previousData.total - ids.length),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, ids) => {
       if (showSuccessMessage) {
         message.success(successMessages.batchDelete || '批量删除成功');
@@ -183,7 +243,10 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
       refreshData();
       await onSuccess?.batchDelete?.(ids);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         const errorMsg = errorMessages.batchDelete || error.message || '批量删除失败';
         message.error(errorMsg);
@@ -196,7 +259,7 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
     async (data: CreateUserDto): Promise<User> => {
       return createMutation.mutateAsync(data);
     },
-    [createMutation],
+    [createMutation]
   );
 
   // 更新（包装函数）
@@ -204,7 +267,7 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
     async (id: string, data: UpdateUserDto): Promise<User> => {
       return updateMutation.mutateAsync({ id, data });
     },
-    [updateMutation],
+    [updateMutation]
   );
 
   // 删除
@@ -212,7 +275,7 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
     async (id: string): Promise<void> => {
       return deleteMutation.mutateAsync(id);
     },
-    [deleteMutation],
+    [deleteMutation]
   );
 
   // 批量删除
@@ -224,7 +287,7 @@ export function useUsersMutation(options: UseUsersMutationOptions = {}): UseUser
       }
       return batchDeleteMutation.mutateAsync(ids);
     },
-    [batchDeleteMutation],
+    [batchDeleteMutation]
   );
 
   return {

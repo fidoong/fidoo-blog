@@ -73,7 +73,7 @@ export function TableSearchForm({
         await onSubmit(values);
       }
     },
-    [onChange, onSubmit],
+    [onChange, onSubmit]
   );
 
   // 处理重置

@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export interface Role {
   id: string;
@@ -38,14 +39,6 @@ export interface QueryRoleDto {
   limit?: number;
   name?: string;
   code?: string;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
 }
 
 export const rolesApi = {

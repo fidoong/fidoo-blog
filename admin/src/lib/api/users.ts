@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export interface User {
   id: string;
@@ -41,14 +42,6 @@ export interface QueryUserDto {
   email?: string;
   role?: string;
   status?: string;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
 }
 
 export const usersApi = {

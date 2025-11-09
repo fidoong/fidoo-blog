@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export enum MediaType {
   IMAGE = 'image',
@@ -29,14 +30,6 @@ export interface QueryMediaDto {
   page?: number;
   limit?: number;
   type?: MediaType;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
 }
 
 export const mediaApi = {
@@ -66,4 +59,3 @@ export const mediaApi = {
     return apiClient.post<void>(`/media/${id}/delete`);
   },
 };
-

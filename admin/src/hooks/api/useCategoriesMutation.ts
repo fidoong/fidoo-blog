@@ -11,6 +11,7 @@ import {
   type CreateCategoryDto,
   type UpdateCategoryDto,
 } from '@/lib/api/categories';
+import type { PaginatedResponse } from '@/lib/api/types';
 
 export interface UseCategoriesMutationOptions {
   successMessages?: {
@@ -38,7 +39,9 @@ export interface UseCategoriesMutationOptions {
 
 export interface UseCategoriesMutationReturn {
   createMutation: ReturnType<typeof useMutation<Category, Error, CreateCategoryDto>>;
-  updateMutation: ReturnType<typeof useMutation<Category, Error, { id: string; data: UpdateCategoryDto }>>;
+  updateMutation: ReturnType<
+    typeof useMutation<Category, Error, { id: string; data: UpdateCategoryDto }>
+  >;
   deleteMutation: ReturnType<typeof useMutation<void, Error, string>>;
   batchDeleteMutation: ReturnType<typeof useMutation<void, Error, (string | number)[]>>;
   create: (data: CreateCategoryDto) => Promise<Category>;
@@ -48,7 +51,7 @@ export interface UseCategoriesMutationReturn {
 }
 
 export function useCategoriesMutation(
-  options: UseCategoriesMutationOptions = {},
+  options: UseCategoriesMutationOptions = {}
 ): UseCategoriesMutationReturn {
   const {
     successMessages = {},
@@ -72,6 +75,18 @@ export function useCategoriesMutation(
 
   const createMutation = useMutation({
     mutationFn: categoriesApi.createCategory,
+    onMutate: async (newCategory) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Category>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Category>>(queryKey, {
+          ...previousData,
+          items: [{ ...newCategory, id: 'temp-' + Date.now() } as Category, ...previousData.items],
+          total: previousData.total + 1,
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.create || '创建成功');
@@ -79,7 +94,10 @@ export function useCategoriesMutation(
       refreshData();
       await onSuccess?.create?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.create || error.message || '创建失败');
       }
@@ -89,6 +107,19 @@ export function useCategoriesMutation(
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateCategoryDto }) =>
       categoriesApi.updateCategory(id, data),
+    onMutate: async ({ id, data: updateData }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Category>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Category>>(queryKey, {
+          ...previousData,
+          items: previousData.items.map((item) =>
+            item.id === id ? { ...item, ...updateData } : item
+          ),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (data) => {
       if (showSuccessMessage) {
         message.success(successMessages.update || '更新成功');
@@ -96,7 +127,10 @@ export function useCategoriesMutation(
       refreshData();
       await onSuccess?.update?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.update || error.message || '更新失败');
       }
@@ -105,6 +139,18 @@ export function useCategoriesMutation(
 
   const deleteMutation = useMutation({
     mutationFn: categoriesApi.deleteCategory,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Category>>(queryKey);
+      if (previousData) {
+        queryClient.setQueryData<PaginatedResponse<Category>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => item.id !== id),
+          total: Math.max(0, previousData.total - 1),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, id) => {
       if (showSuccessMessage) {
         message.success(successMessages.delete || '删除成功');
@@ -112,7 +158,10 @@ export function useCategoriesMutation(
       refreshData();
       await onSuccess?.delete?.(id);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.delete || error.message || '删除失败');
       }
@@ -123,6 +172,19 @@ export function useCategoriesMutation(
     mutationFn: async (ids: (string | number)[]) => {
       await Promise.all(ids.map((id) => categoriesApi.deleteCategory(String(id))));
     },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<PaginatedResponse<Category>>(queryKey);
+      if (previousData) {
+        const idSet = new Set(ids.map((id) => String(id)));
+        queryClient.setQueryData<PaginatedResponse<Category>>(queryKey, {
+          ...previousData,
+          items: previousData.items.filter((item) => !idSet.has(item.id)),
+          total: Math.max(0, previousData.total - ids.length),
+        });
+      }
+      return { previousData };
+    },
     onSuccess: async (_, ids) => {
       if (showSuccessMessage) {
         message.success(successMessages.batchDelete || '批量删除成功');
@@ -130,7 +192,10 @@ export function useCategoriesMutation(
       refreshData();
       await onSuccess?.batchDelete?.(ids);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       if (showErrorMessage) {
         message.error(errorMessages.batchDelete || error.message || '批量删除失败');
       }
@@ -141,21 +206,21 @@ export function useCategoriesMutation(
     async (data: CreateCategoryDto): Promise<Category> => {
       return createMutation.mutateAsync(data);
     },
-    [createMutation],
+    [createMutation]
   );
 
   const update = useCallback(
     async (id: string, data: UpdateCategoryDto): Promise<Category> => {
       return updateMutation.mutateAsync({ id, data });
     },
-    [updateMutation],
+    [updateMutation]
   );
 
   const deleteItem = useCallback(
     async (id: string): Promise<void> => {
       return deleteMutation.mutateAsync(id);
     },
-    [deleteMutation],
+    [deleteMutation]
   );
 
   const batchDelete = useCallback(
@@ -166,7 +231,7 @@ export function useCategoriesMutation(
       }
       return batchDeleteMutation.mutateAsync(ids);
     },
-    [batchDeleteMutation],
+    [batchDeleteMutation]
   );
 
   return {
@@ -180,4 +245,3 @@ export function useCategoriesMutation(
     batchDelete,
   };
 }
-

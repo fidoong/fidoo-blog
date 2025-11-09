@@ -129,7 +129,7 @@ export function SchemaForm({
   // 构建 Schema - 不使用 FormGrid，直接使用字段
   const schema = useMemo(
     () => buildFormSchema({ fields, layout, ...rest }, initialValues),
-    [fields, layout, initialValues, rest],
+    [fields, layout, initialValues, rest]
   );
 
   // 处理提交

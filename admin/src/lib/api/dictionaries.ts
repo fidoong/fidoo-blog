@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export enum DictionaryType {
   SYSTEM = 'system',
@@ -58,14 +59,6 @@ export interface QueryDictionaryDto {
   isActive?: boolean;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const dictionariesApi = {
   // 获取字典列表
   getDictionaries: async (params?: QueryDictionaryDto): Promise<PaginatedResponse<Dictionary>> => {
@@ -74,7 +67,9 @@ export const dictionariesApi = {
 
   // 获取字典树
   getDictionaryTree: async (code?: string): Promise<Dictionary[]> => {
-    return apiClient.get<Dictionary[]>('/dictionaries/tree', { params: code ? { code } : undefined });
+    return apiClient.get<Dictionary[]>('/dictionaries/tree', {
+      params: code ? { code } : undefined,
+    });
   },
 
   // 获取字典详情
@@ -102,4 +97,3 @@ export const dictionariesApi = {
     return apiClient.post<void>('/dictionaries/batch-delete', { ids });
   },
 };
-

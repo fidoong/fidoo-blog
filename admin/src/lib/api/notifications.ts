@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import type { PaginatedResponse } from './types';
 
 export interface Notification {
   id: string;
@@ -23,18 +24,10 @@ export interface QueryNotificationDto {
   isRead?: boolean;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
 export const notificationsApi = {
   // 获取通知列表
   getNotifications: async (
-    params?: QueryNotificationDto,
+    params?: QueryNotificationDto
   ): Promise<PaginatedResponse<Notification>> => {
     return apiClient.get<PaginatedResponse<Notification>>('/notifications', { params });
   },
