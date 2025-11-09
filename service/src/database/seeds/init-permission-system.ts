@@ -976,7 +976,7 @@ async function initPermissionSystem() {
         title: '审计日志',
         path: '/system/audit-logs',
         component: 'system/audit-logs',
-        icon: 'FileSearch',
+        icon: 'SearchOutlined',
         code: 'menu:system:audit-logs',
         type: MenuType.MENU,
         parentId: systemMenuId,

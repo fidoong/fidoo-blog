@@ -35,14 +35,23 @@ export default function LoginPage() {
     try {
       const response = await authApi.login(values);
 
-      // 获取权限和菜单
+      // 先保存 token 到 localStorage，确保后续请求可以获取到 token
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
+        }
+      }
+
+      // 保存认证信息到 store
+      setAuth(response.user, response.accessToken, response.refreshToken);
+
+      // 获取权限和菜单（此时 token 已经保存，可以正常请求）
       const [permissions, menus] = await Promise.all([
         authApi.getPermissions(),
         authApi.getMenus(),
       ]);
 
-      // 保存认证信息
-      setAuth(response.user, response.accessToken, response.refreshToken);
       setPermissions(permissions);
       setMenus(menus);
 

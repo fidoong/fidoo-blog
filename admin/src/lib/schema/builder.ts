@@ -112,11 +112,22 @@ function getFormilyComponent(type: FieldConfig['type']): string {
  * 构建表单 Schema
  */
 export function buildFormSchema(config: FormSchemaConfig, formValues: any = {}): ISchema {
+  // 防御性检查：确保 config 和 fields 存在
+  if (!config || !config.fields || !Array.isArray(config.fields)) {
+    console.warn('buildFormSchema: config.fields is missing or not an array', config);
+    return {
+      type: 'object',
+      properties: {},
+    };
+  }
+
   // 不再使用 FormGrid 嵌套字段，直接返回字段
   // Grid 布局由 CSS 处理，不嵌套字段值
   const properties: Record<string, ISchema> = {};
   config.fields.forEach((field) => {
-    properties[field.name] = fieldToFormilySchema(field, formValues);
+    if (field && field.name) {
+      properties[field.name] = fieldToFormilySchema(field, formValues);
+    }
   });
 
   return {

@@ -28,6 +28,7 @@
     "seed:dictionaries": "ts-node -r tsconfig-paths/register src/database/seeds/init-dictionaries.ts",
     "seed:fix-admin": "ts-node -r tsconfig-paths/register src/database/seeds/fix-admin-role.ts",
     "seed:audit-logs": "ts-node -r tsconfig-paths/register src/database/seeds/add-audit-logs-menu.ts",
+    "seed:fix-audit-icon": "ts-node -r tsconfig-paths/register src/database/seeds/fix-audit-logs-icon.ts",
     "clean": "rimraf dist"
   },
   "dependencies": {

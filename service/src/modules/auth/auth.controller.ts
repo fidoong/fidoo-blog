@@ -97,7 +97,8 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '获取当前用户菜单列表' })
   async getMenus(@CurrentUser() user: User) {
-    return await this.usersService.getUserMenus(user.id);
+    const menus = await this.usersService.getUserMenus(user.id);
+    return menus;
   }
 
   @Post('logout')

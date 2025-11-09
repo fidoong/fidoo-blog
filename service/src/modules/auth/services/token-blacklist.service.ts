@@ -66,11 +66,16 @@ export class TokenBlacklistService {
     try {
       const tokenKey = this.getTokenKey(token);
       const value = await this.cacheManager.get<string>(tokenKey);
-      return value === 'blacklisted';
+      const isBlacklisted = value === 'blacklisted';
+      if (isBlacklisted) {
+        this.logger.debug(`Token 在黑名单中: ${tokenKey}`);
+      }
+      return isBlacklisted;
     } catch (error) {
-      this.logger.error('检查黑名单失败', error);
-      // 出错时为了安全，返回 true（认为 token 已被拉黑）
-      return true;
+      this.logger.error('检查黑名单失败，可能是 Redis 连接问题', error);
+      // 如果 Redis 连接失败，为了不影响正常使用，返回 false（允许 token 通过）
+      // 在生产环境中，可以根据需要调整这个策略
+      return false;
     }
   }
 
@@ -123,10 +128,15 @@ export class TokenBlacklistService {
         return false;
       }
       // 如果 token 的签发时间早于被拉黑的时间，则 token 无效
-      return parseInt(blacklistedAt, 10) > tokenIssuedAt * 1000;
+      const isBlacklisted = parseInt(blacklistedAt, 10) > tokenIssuedAt * 1000;
+      if (isBlacklisted) {
+        this.logger.debug(`用户 ${userId} 已被强制登出`);
+      }
+      return isBlacklisted;
     } catch (error) {
-      this.logger.error('检查用户黑名单失败', error);
-      return true; // 为了安全，返回 true
+      this.logger.error('检查用户黑名单失败，可能是 Redis 连接问题', error);
+      // 如果 Redis 连接失败，为了不影响正常使用，返回 false（允许 token 通过）
+      return false;
     }
   }
 

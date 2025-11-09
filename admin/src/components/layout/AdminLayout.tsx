@@ -36,8 +36,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // 构建菜单项
   const buildMenuItems = (menuList: MenuItem[]): MenuProps['items'] => {
+    if (!menuList || menuList.length === 0) {
+      return [];
+    }
+
     return menuList
-      .filter((menu) => menu.status === 'enabled' && !menu.isHidden)
+      .filter((menu) => {
+        // 过滤：只显示启用且未隐藏的菜单
+        return menu.status === 'enabled' && !menu.isHidden;
+      })
       .map((menu) => {
         const item: MenuProps['items'][0] = {
           key: menu.path || menu.id,
@@ -45,19 +52,43 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           label: menu.title || menu.name,
         };
 
+        // 如果有子菜单，递归构建
         if (menu.children && menu.children.length > 0) {
-          item.children = buildMenuItems(menu.children);
-        } else if (menu.path) {
+          const childItems = buildMenuItems(menu.children);
+          // 只有当子菜单不为空时才添加 children
+          if (childItems && childItems.length > 0) {
+            item.children = childItems;
+          }
+        }
+
+        // 如果没有子菜单且有路径，添加点击事件
+        if (!item.children && menu.path) {
           item.onClick = () => {
-            router.push(menu.path);
+            router.push(menu.path!);
           };
         }
 
         return item;
+      })
+      .filter((item) => {
+        // 过滤掉没有子菜单且没有路径的项（无效菜单项）
+        return item.children || item.onClick;
       });
   };
 
-  const menuItems = useMemo(() => buildMenuItems(menus || []), [menus, pathname]);
+  const menuItems = useMemo(() => {
+    // 调试：打印菜单数据
+    if (process.env.NODE_ENV === 'development' && menus) {
+      console.log('[AdminLayout] 原始菜单数据:', menus);
+      console.log('[AdminLayout] 菜单数量:', menus.length);
+    }
+    const items = buildMenuItems(menus || []);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[AdminLayout] 构建后的菜单项:', items);
+      console.log('[AdminLayout] 菜单项数量:', items.length);
+    }
+    return items;
+  }, [menus, pathname]);
 
   // 用户下拉菜单
   const userMenuItems: MenuProps['items'] = [

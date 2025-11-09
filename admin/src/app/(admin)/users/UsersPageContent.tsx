@@ -274,7 +274,11 @@ export default function UsersPageContent() {
         onCreate={handleCreate}
         onBatchDelete={selection.selectedRows.length > 0 ? handleBatchDelete : undefined}
       />
-      <TableSearchForm config={searchFormConfig} values={searchValues} onChange={setSearchValues} />
+      <TableSearchForm
+        {...searchFormConfig}
+        value={searchValues}
+        onChange={setSearchValues}
+      />
       <Table
         columns={[
           ...columns,

@@ -14,6 +14,7 @@ import { RolePermission } from '@/modules/role-permissions/entities/role-permiss
 import { Permission } from '@/modules/permissions/entities/permission.entity';
 import { Menu, MenuStatus } from '@/modules/menus/entities/menu.entity';
 import { RoleMenu } from '@/modules/role-menus/entities/role-menu.entity';
+import { MenuResponseDto } from '@/modules/menus/dto/menu-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -307,7 +308,37 @@ export class UsersService {
   /**
    * 获取用户的菜单列表（返回完整的树形结构，支持多级递归）
    */
-  async getUserMenus(userId: string): Promise<Menu[]> {
+  /**
+   * 将 Menu 实体转换为 MenuResponseDto
+   */
+  private transformMenuToDto(menu: Menu): MenuResponseDto {
+    const dto: MenuResponseDto = {
+      id: menu.id,
+      name: menu.name,
+      title: menu.title || menu.name,
+      path: menu.path || undefined,
+      component: menu.component || undefined,
+      icon: menu.icon || undefined,
+      code: menu.code || undefined,
+      type: menu.type,
+      parentId: menu.parentId || undefined,
+      sortOrder: menu.sortOrder || 0,
+      status: menu.status,
+      isHidden: menu.isHidden || false,
+      permission: menu.permissionCode || undefined,
+      createdAt: menu.createdAt,
+      updatedAt: menu.updatedAt,
+    };
+
+    // 递归转换子菜单
+    if (menu.children && menu.children.length > 0) {
+      dto.children = menu.children.map((child) => this.transformMenuToDto(child));
+    }
+
+    return dto;
+  }
+
+  async getUserMenus(userId: string): Promise<MenuResponseDto[]> {
     // 获取用户的所有角色
     const userRoles = await this.userRoleRepository.find({
       where: { userId },
@@ -469,8 +500,8 @@ export class UsersService {
 
     sortMenus(rootMenus);
 
-    // 返回完整的树形结构
-    return rootMenus;
+    // 转换为 DTO 格式并返回
+    return rootMenus.map((menu) => this.transformMenuToDto(menu));
   }
 
   /**

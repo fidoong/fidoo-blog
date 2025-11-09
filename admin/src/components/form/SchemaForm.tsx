@@ -127,10 +127,17 @@ export function SchemaForm({
   }, [externalForm, initialValues]);
 
   // 构建 Schema - 不使用 FormGrid，直接使用字段
-  const schema = useMemo(
-    () => buildFormSchema({ fields, layout, ...rest }, initialValues),
-    [fields, layout, initialValues, rest]
-  );
+  const schema = useMemo(() => {
+    // 防御性检查：确保 fields 存在
+    if (!fields || !Array.isArray(fields) || fields.length === 0) {
+      console.warn('SchemaForm: fields is missing, empty, or not an array', { fields });
+      return {
+        type: 'object',
+        properties: {},
+      };
+    }
+    return buildFormSchema({ fields, layout, ...rest }, initialValues);
+  }, [fields, layout, initialValues, rest]);
 
   // 处理提交
   const handleSubmit = async (values: Record<string, unknown>) => {
