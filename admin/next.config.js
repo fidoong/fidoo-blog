@@ -2,42 +2,13 @@
 const nextConfig = {
   reactStrictMode: true,
   compress: true,
-
-  // 优化图片
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
-        pathname: '/**',
-      },
-      {
-        protocol: 'http',
-        hostname: '172.16.164.106',
-        port: '3005',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60 * 60 * 24 * 30,
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-  },
-
-  // 性能优化
+  
+  // 优化
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion', 'recharts'],
+    optimizePackageImports: ['antd', '@ant-design/icons', '@formily/antd-v5'],
   },
 
-  // 编译优化
   compiler: {
     removeConsole:
       process.env.NODE_ENV === 'production'
@@ -61,7 +32,7 @@ const nextConfig = {
     ];
   },
 
-  // 安全头部
+  // 安全头
   async headers() {
     return [
       {

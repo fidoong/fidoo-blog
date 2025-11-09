@@ -1,87 +1,104 @@
+/**
+ * 登录页面
+ */
+
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Button, Card, message, Spin } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/store/auth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-
-const loginSchema = z.object({
-  username: z.string().min(1, '请输入用户名'),
-  password: z.string().min(1, '请输入密码'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { setAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const { user, accessToken, _hasHydrated, setAuth, setPermissions, setMenus } = useAuthStore();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-  });
+  // 如果已经登录，跳转到 dashboard
+  useEffect(() => {
+    if (!_hasHydrated) {
+      return;
+    }
 
-  const onSubmit = async (data: LoginForm) => {
+    if (accessToken && user) {
+      router.push('/dashboard');
+    } else {
+      setChecking(false);
+    }
+  }, [_hasHydrated, accessToken, user, router]);
+
+  const handleSubmit = async (values: { username: string; password: string }) => {
     setLoading(true);
     try {
-      const loginResponse = await authApi.login(data);
-      const { user, accessToken, refreshToken } = loginResponse;
-      setAuth(user, accessToken, refreshToken);
-      toast.success('登录成功');
-      const redirect = searchParams.get('redirect') || '/dashboard';
-      router.push(redirect);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '登录失败，请检查网络连接');
+      const response = await authApi.login(values);
+
+      // 获取权限和菜单
+      const [permissions, menus] = await Promise.all([
+        authApi.getPermissions(),
+        authApi.getMenus(),
+      ]);
+
+      // 保存认证信息
+      setAuth(response.user, response.accessToken, response.refreshToken);
+      setPermissions(permissions);
+      setMenus(menus);
+
+      message.success('登录成功');
+      router.push('/dashboard');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '登录失败，请检查用户名和密码';
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  // 等待 hydration 完成或检查是否已登录
+  if (checking || !_hasHydrated) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">登录后台管理系统</CardTitle>
-          <CardDescription>请输入您的账号和密码</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <div>
-                <Input {...register('username')} placeholder="用户名" disabled={loading} />
-                {errors.username && (
-                  <p className="mt-1 text-sm text-destructive">{errors.username.message}</p>
-                )}
-              </div>
-            </div>
-            <div>
-              <Input
-                {...register('password')}
-                type="password"
-                placeholder="密码"
-                disabled={loading}
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? '登录中...' : '登录'}
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      }}
+    >
+      <Card title="Fidoo Blog 管理后台" style={{ width: 400 }}>
+        <Form name="login" onFinish={handleSubmit} autoComplete="off" size="large">
+          <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
+            <Input prefix={<UserOutlined />} placeholder="用户名" />
+          </Form.Item>
+
+          <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block loading={loading}>
+              登录
             </Button>
-          </form>
-        </CardContent>
+          </Form.Item>
+        </Form>
       </Card>
     </div>
   );

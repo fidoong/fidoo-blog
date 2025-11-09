@@ -1,115 +1,102 @@
+/**
+ * 路由权限保护组件
+ */
+
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Spin } from 'antd';
 import { useAuthStore } from '@/store/auth';
-import { useUserPermissions } from '@/hooks/usePermissions';
+import { authApi } from '@/lib/api/auth';
+import { Permission } from '@/hooks/usePermissions';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  /** 需要的权限代码数组（用户需要拥有其中任意一个权限） */
-  requiredPermissions?: string[];
+  permission?: string;
+  permissions?: string[];
+  mode?: 'all' | 'any';
+  redirectTo?: string;
 }
 
-export function ProtectedRoute({ children, requiredPermissions }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  permission,
+  permissions,
+  mode = 'any',
+  redirectTo = '/auth/login',
+}: ProtectedRouteProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const { isAuthenticated, hasHydrated } = useAuthStore();
-  const [isChecking, setIsChecking] = useState(true);
-  const { data: permissions, isLoading: isLoadingPermissions } = useUserPermissions();
-
-  // 检查权限
-  const hasPermission = (() => {
-    // 如果权限数据还在加载，返回 undefined（表示未知）
-    if (isLoadingPermissions || !permissions) {
-      return undefined;
-    }
-
-    // 确保 permissions 是数组
-    if (!Array.isArray(permissions) || permissions.length === 0) {
-      return false;
-    }
-
-    // 如果不需要任何权限，返回 true
-    if (!requiredPermissions || requiredPermissions.length === 0) {
-      return true;
-    }
-
-    return requiredPermissions.some((code) => permissions.includes(code));
-  })();
-
-  // 等待状态恢复完成
-  useEffect(() => {
-    if (hasHydrated) {
-      setIsChecking(false);
-    }
-  }, [hasHydrated]);
+  const { user, accessToken, setPermissions, setMenus, _hasHydrated } = useAuthStore();
+  const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // 如果还在检查状态，不执行任何操作
-    if (isChecking || !hasHydrated) {
+    // 等待 zustand persist 完成 hydration
+    if (!_hasHydrated) {
       return;
     }
 
-    if (!isAuthenticated) {
-      router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
-      return;
-    }
+    const checkAuth = async () => {
+      // 如果没有 token，跳转到登录页
+      if (!accessToken) {
+        router.push(redirectTo);
+        return;
+      }
 
-    // 等待权限数据加载完成
-    if (isLoadingPermissions || hasPermission === undefined) {
-      return;
-    }
+      // 如果没有用户信息，尝试从 API 获取
+      if (!user) {
+        try {
+          const [profile, permissionsData, menusData] = await Promise.all([
+            authApi.getProfile(),
+            authApi.getPermissions(),
+            authApi.getMenus(),
+          ]);
 
-    // 检查权限（只有在权限数据加载完成后才检查）
-    if (requiredPermissions && requiredPermissions.length > 0 && hasPermission === false) {
-      router.push('/dashboard');
-      return;
-    }
-  }, [
-    isAuthenticated,
-    requiredPermissions,
-    hasPermission,
-    isLoadingPermissions,
-    router,
-    pathname,
-    isChecking,
-    hasHydrated,
-  ]);
+          useAuthStore.setState({
+            user: profile,
+            permissions: permissionsData,
+            menus: menusData,
+          });
 
-  // 如果状态还未恢复或权限数据还在加载，显示加载状态
-  if (isChecking || !hasHydrated || isLoadingPermissions || hasPermission === undefined) {
+          setPermissions(permissionsData);
+          setMenus(menusData);
+        } catch (error) {
+          console.error('获取用户信息失败:', error);
+          // Token 可能已过期，清除认证信息并跳转登录
+          useAuthStore.getState().clearAuth();
+          router.push(redirectTo);
+          return;
+        }
+      }
+
+      setInitialized(true);
+      setLoading(false);
+    };
+
+    if (!initialized) {
+      checkAuth();
+    }
+  }, [_hasHydrated, accessToken, user, router, redirectTo, setPermissions, setMenus, initialized]);
+
+  // 等待 hydration 完成
+  if (!_hasHydrated || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="mt-4 text-sm text-muted-foreground">加载中...</p>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Spin size="large" />
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // 检查权限（只有在权限数据加载完成后才检查）
-  if (requiredPermissions && requiredPermissions.length > 0 && hasPermission === false) {
+  // 权限检查
+  if (permission || permissions) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-destructive">访问被拒绝</h2>
-          <p className="mt-4 text-muted-foreground">您没有访问此页面的权限</p>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="mt-4 text-primary hover:underline"
-          >
-            返回仪表盘
-          </button>
-        </div>
-      </div>
+      <Permission permission={permission} permissions={permissions} mode={mode}>
+        {children}
+      </Permission>
     );
   }
 
   return <>{children}</>;
 }
+

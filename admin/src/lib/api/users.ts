@@ -1,26 +1,59 @@
+/**
+ * 用户管理 API
+ */
+
 import { apiClient } from './client';
-import type { User, PaginatedResponse, UserQueryParams } from './types';
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  nickname?: string;
+  avatar?: string;
+  role?: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface CreateUserDto {
   username: string;
   email: string;
   password: string;
   nickname?: string;
-  role?: 'admin' | 'editor' | 'user';
+  role?: string;
 }
 
 export interface UpdateUserDto {
-  nickname?: string;
+  username?: string;
   email?: string;
-  bio?: string;
+  nickname?: string;
   avatar?: string;
-  role?: 'admin' | 'editor' | 'user';
-  status?: 'active' | 'inactive' | 'banned';
+  role?: string;
+  status?: string;
+}
+
+export interface QueryUserDto {
+  page?: number;
+  pageSize?: number;
+  limit?: number;
+  username?: string;
+  email?: string;
+  role?: string;
+  status?: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export const usersApi = {
-  // 获取用户列表（支持增强查询条件）
-  getUsers: async (params?: UserQueryParams): Promise<PaginatedResponse<User>> => {
+  // 获取用户列表
+  getUsers: async (params?: QueryUserDto): Promise<PaginatedResponse<User>> => {
     return apiClient.get<PaginatedResponse<User>>('/users', { params });
   },
 
@@ -36,12 +69,11 @@ export const usersApi = {
 
   // 更新用户
   updateUser: async (id: string, data: UpdateUserDto): Promise<User> => {
-    return apiClient.post<User>(`/users/${id}/update`, data);
+    return apiClient.put<User>(`/users/${id}`, data);
   },
 
   // 删除用户
   deleteUser: async (id: string): Promise<void> => {
-    return apiClient.post<void>(`/users/${id}/delete`);
+    return apiClient.delete<void>(`/users/${id}`);
   },
 };
-

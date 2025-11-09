@@ -66,7 +66,11 @@ export class UsersService {
   }
 
   async findAll(queryDto: QueryUserDto | QueryDto): Promise<PaginationResponseDto<User>> {
-    const isEnhancedQuery = 'usernameLike' in queryDto || 'roles' in queryDto;
+    const isEnhancedQuery =
+      'username' in queryDto ||
+      'usernameLike' in queryDto ||
+      'email' in queryDto ||
+      'roles' in queryDto;
     const query = isEnhancedQuery ? (queryDto as QueryUserDto) : null;
     const legacyQuery = !isEnhancedQuery ? (queryDto as QueryDto) : null;
 
@@ -86,11 +90,23 @@ export class UsersService {
       );
     }
 
+    // 用户名精确匹配
+    if (query?.username) {
+      queryBuilder.andWhere('user.username = :username', {
+        username: query.username,
+      });
+    }
+
     // 用户名模糊匹配
     if (query?.usernameLike) {
       queryBuilder.andWhere('user.username LIKE :usernameLike', {
         usernameLike: `%${query.usernameLike}%`,
       });
+    }
+
+    // 邮箱精确匹配
+    if (query?.email) {
+      queryBuilder.andWhere('user.email = :email', { email: query.email });
     }
 
     // 邮箱模糊匹配

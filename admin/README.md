@@ -1,56 +1,25 @@
-# Fidoo Blog Admin - 后台管理系统
+# Fidoo Blog 企业级后台管理系统
 
-企业级博客后台管理系统，基于 Next.js 14 + TypeScript + Tailwind CSS 构建。
+基于 Formily + Ant Design 的企业级后台管理系统，支持配置化页面开发、权限控制、函数式弹窗表单等功能。
 
 ## 特性
 
-- 🎨 **现代化 UI** - 基于 shadcn/ui 组件库，美观易用
-- 🔐 **权限控制** - 基于角色的访问控制（RBAC）
-- 📊 **数据可视化** - 丰富的统计图表和仪表盘
-- 🚀 **高性能** - 使用 React Query 进行数据缓存和状态管理
-- 📱 **响应式设计** - 完美适配各种设备
-- 🎯 **类型安全** - 完整的 TypeScript 类型定义
-- 🔄 **实时更新** - 支持数据实时刷新
+- ✅ **配置化页面开发** - 基于 Schema 配置快速构建表单和表格页面
+- ✅ **权限系统集成** - 完整的菜单、路由、按钮权限控制
+- ✅ **函数式弹窗表单** - Promise 风格的弹窗表单提交
+- ✅ **Formily 集成** - 强大的表单解决方案
+- ✅ **Ant Design 5** - 现代化的 UI 组件库
+- ✅ **TypeScript** - 完整的类型支持
+- ✅ **Next.js 14** - 基于 App Router 的路由系统
 
 ## 技术栈
 
 - **框架**: Next.js 14 (App Router)
-- **语言**: TypeScript
-- **样式**: Tailwind CSS
-- **UI 组件**: shadcn/ui + Radix UI
+- **UI 库**: Ant Design 5
+- **表单**: Formily 2.x
 - **状态管理**: Zustand
-- **数据获取**: React Query (TanStack Query)
-- **表单处理**: React Hook Form + Zod
-- **图标**: Lucide React
-
-## 项目结构
-
-```
-admin/
-├── src/
-│   ├── app/                    # Next.js App Router 页面
-│   │   ├── auth/              # 认证相关页面
-│   │   ├── dashboard/         # 仪表盘
-│   │   ├── posts/             # 文章管理
-│   │   ├── categories/        # 分类管理
-│   │   ├── tags/              # 标签管理
-│   │   ├── users/             # 用户管理
-│   │   ├── comments/          # 评论管理
-│   │   ├── media/             # 媒体管理
-│   │   └── system/            # 系统设置
-│   ├── components/            # React 组件
-│   │   ├── layout/           # 布局组件
-│   │   ├── ui/               # UI 基础组件
-│   │   └── auth/             # 认证组件
-│   ├── lib/                  # 工具库
-│   │   ├── api/              # API 客户端
-│   │   └── utils/            # 工具函数
-│   └── store/                # 状态管理
-├── package.json
-├── tsconfig.json
-├── next.config.js
-└── tailwind.config.js
-```
+- **数据获取**: TanStack Query (React Query)
+- **类型**: TypeScript
 
 ## 快速开始
 
@@ -60,7 +29,7 @@ admin/
 pnpm install
 ```
 
-### 开发模式
+### 开发
 
 ```bash
 pnpm dev
@@ -68,100 +37,149 @@ pnpm dev
 
 访问 http://localhost:3001
 
-### 构建生产版本
+### 构建
 
 ```bash
 pnpm build
+```
+
+### 启动生产环境
+
+```bash
 pnpm start
 ```
 
-## 功能模块
+## 核心功能
 
-### 1. 仪表盘
-- 系统概览统计
-- 最近文章列表
-- 系统运行状态
+### 1. 配置化页面开发
 
-### 2. 文章管理
-- 文章列表（分页、搜索、筛选）
-- 创建/编辑文章
-- 文章状态管理（草稿/已发布/已归档）
-- 文章删除
+通过 Schema 配置快速构建页面：
 
-### 3. 分类管理
-- 分类列表
-- 创建/编辑分类
-- 分类树形结构
-- 分类删除
+```typescript
+const formConfig: FormSchemaConfig = {
+  fields: [
+    {
+      name: 'username',
+      label: '用户名',
+      type: 'input',
+      required: true,
+    },
+    {
+      name: 'email',
+      label: '邮箱',
+      type: 'input',
+      required: true,
+    },
+  ],
+};
 
-### 4. 标签管理
-- 标签列表
-- 创建/编辑标签
-- 标签颜色设置
-- 标签删除
+const schema = buildFormSchema(formConfig);
+```
 
-### 5. 用户管理
-- 用户列表（分页、搜索）
-- 创建/编辑用户
-- 角色管理
-- 用户状态管理
-- 用户删除
+### 2. 函数式弹窗表单
 
-### 6. 评论管理
-- 评论列表
-- 评论审核
-- 评论删除
+Promise 风格的弹窗表单：
 
-### 7. 媒体管理
-- 文件上传
-- 媒体库浏览
-- 文件删除
+```typescript
+try {
+  const values = await showFormDialog({
+    title: '创建用户',
+    fields: [...],
+    onSubmit: async (values) => {
+      await api.createUser(values);
+    },
+  });
+  message.success('创建成功');
+} catch (error) {
+  // 用户取消或提交失败
+}
+```
 
-### 8. 系统设置
-- 系统信息
-- 进程信息
-- 服务器状态
+### 3. 权限控制
 
-## 权限说明
+#### 按钮权限
 
-系统支持三种角色：
+```tsx
+<Permission permission="users:create">
+  <Button>创建用户</Button>
+</Permission>
+```
 
-- **admin** - 管理员：拥有所有权限
-- **editor** - 编辑：可以管理内容（文章、分类、标签、评论、媒体）
-- **user** - 用户：只能查看仪表盘
+#### 路由权限
+
+```tsx
+<ProtectedRoute permission="users:view">
+  <UsersPage />
+</ProtectedRoute>
+```
+
+### 4. 菜单权限
+
+菜单通过后端接口动态加载，根据用户权限自动过滤。
+
+## 项目结构
+
+```
+admin/
+├── src/
+│   ├── app/              # Next.js App Router 页面
+│   │   ├── (admin)/      # 需要认证的管理页面
+│   │   └── auth/         # 认证相关页面
+│   ├── components/       # 组件
+│   │   ├── form/         # 表单组件
+│   │   ├── layout/       # 布局组件
+│   │   └── auth/         # 认证组件
+│   ├── hooks/            # 自定义 Hooks
+│   ├── lib/              # 工具库
+│   │   ├── api/          # API 客户端
+│   │   └── schema/       # Schema 构建器
+│   └── store/            # 状态管理
+└── package.json
+```
+
+## API 集成
+
+系统使用统一的 API 客户端，支持：
+
+- 自动 Token 刷新
+- 请求/响应拦截
+- 错误处理
+- 类型安全
+
+## 权限系统
+
+系统支持完整的 RBAC 权限控制：
+
+- **菜单权限**: 控制菜单显示/隐藏
+- **路由权限**: 控制页面访问
+- **按钮权限**: 控制按钮操作
+
+权限编码格式：`资源:操作`，例如：
+- `users:create` - 创建用户
+- `users:update` - 更新用户
+- `users:delete` - 删除用户
+- `users:view` - 查看用户
+
+## 开发指南
+
+### 创建新页面
+
+1. 在 `src/app/(admin)/` 下创建页面文件
+2. 使用 Schema 配置定义表单和表格
+3. 使用 `showFormDialog` 实现弹窗表单
+4. 使用 `Permission` 组件控制权限
+
+### 添加 API
+
+1. 在 `src/lib/api/` 下创建 API 文件
+2. 使用 `apiClient` 发送请求
+3. 定义 TypeScript 类型
 
 ## 环境变量
-
-创建 `.env.local` 文件：
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3005/api/v1
 ```
-
-## 开发规范
-
-### 代码风格
-- 使用 TypeScript 严格模式
-- 遵循 ESLint 规则
-- 使用 Prettier 格式化代码
-
-### 组件规范
-- 使用函数式组件
-- 使用 React Hooks
-- 组件命名使用 PascalCase
-- 文件命名使用 kebab-case
-
-### API 调用
-- 使用 React Query 进行数据获取
-- 统一错误处理
-- 支持请求重试和缓存
-
-## 参考资源
-
-- [Next.js 文档](https://nextjs.org/docs)
-- [shadcn/ui 文档](https://ui.shadcn.com)
-- [React Query 文档](https://tanstack.com/query/latest)
-- [Tailwind CSS 文档](https://tailwindcss.com/docs)
 
 ## License
 

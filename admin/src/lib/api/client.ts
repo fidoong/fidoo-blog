@@ -15,8 +15,6 @@ export const apiClient = new ApiClient({
     return localStorage.getItem('accessToken');
   },
   refreshToken: async (refreshToken: string) => {
-    // 使用默认的刷新逻辑，但需要导入 apiClient，这里会有循环依赖
-    // 所以使用 axios 直接调用
     const axios = (await import('axios')).default;
     const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005/api/v1';
     const response = await axios.post(`${baseURL}/auth/refresh`, { refreshToken });
@@ -36,11 +34,8 @@ export const apiClient = new ApiClient({
     if (refreshToken) {
       localStorage.setItem('refreshToken', refreshToken);
     }
-    // 同步更新 zustand store
     const store = useAuthStore.getState();
-    if (store.setAccessToken) {
-      store.setAccessToken(accessToken);
-    } else if (store.user) {
+    if (store.user) {
       store.setAuth(store.user, accessToken, refreshToken || store.refreshToken || '');
     }
   },
@@ -48,7 +43,6 @@ export const apiClient = new ApiClient({
     if (typeof window === 'undefined') return;
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    // 同步清除 zustand store
     const store = useAuthStore.getState();
     store.clearAuth();
   },

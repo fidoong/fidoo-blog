@@ -5,10 +5,20 @@ import { BaseQueryDto } from '@/common/dto/base-query.dto';
 import { UserRoleEnum, UserStatus } from '../entities/user.entity';
 
 export class QueryUserDto extends BaseQueryDto {
+  @ApiPropertyOptional({ description: '用户名（精确匹配）', example: 'admin' })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
   @ApiPropertyOptional({ description: '用户名（模糊匹配）', example: 'user' })
   @IsOptional()
   @IsString()
   usernameLike?: string;
+
+  @ApiPropertyOptional({ description: '邮箱（精确匹配）', example: 'user@example.com' })
+  @IsOptional()
+  @IsString()
+  email?: string;
 
   @ApiPropertyOptional({ description: '邮箱（模糊匹配）', example: 'example' })
   @IsOptional()
