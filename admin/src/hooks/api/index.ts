@@ -7,4 +7,8 @@ export * from './useUsersMutation';
 export * from './useRolesMutation';
 export * from './useMenusMutation';
 export * from './usePermissionsMutation';
+export * from './usePostsMutation';
+export * from './useCategoriesMutation';
+export * from './useTagsMutation';
+export * from './useCommentsMutation';
 
