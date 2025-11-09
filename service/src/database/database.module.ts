@@ -18,6 +18,7 @@ import { Role } from '@/modules/roles/entities/role.entity';
 import { UserRole } from '@/modules/user-roles/entities/user-role.entity';
 import { RolePermission } from '@/modules/role-permissions/entities/role-permission.entity';
 import { RoleMenu } from '@/modules/role-menus/entities/role-menu.entity';
+import { Dictionary } from '@/modules/dictionaries/entities/dictionary.entity';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { RoleMenu } from '@/modules/role-menus/entities/role-menu.entity';
           UserRole,
           RolePermission,
           RoleMenu,
+          Dictionary,
         ],
         synchronize: configService.get('database.synchronize'),
         logging: configService.get('database.logging'),

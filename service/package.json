@@ -25,6 +25,7 @@
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/run-seed.ts",
     "seed:large": "ts-node -r tsconfig-paths/register src/database/seeds/generate-large-data.ts",
     "seed:permission": "ts-node -r tsconfig-paths/register src/database/seeds/init-permission-system.ts",
+    "seed:dictionaries": "ts-node -r tsconfig-paths/register src/database/seeds/init-dictionaries.ts",
     "seed:fix-admin": "ts-node -r tsconfig-paths/register src/database/seeds/fix-admin-role.ts",
     "clean": "rimraf dist"
   },

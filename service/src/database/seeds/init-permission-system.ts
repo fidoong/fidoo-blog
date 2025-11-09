@@ -565,6 +565,58 @@ async function initPermissionSystem() {
       }),
     );
 
+    // ========== 字典管理权限 ==========
+    permissions.push(
+      permissionRepo.create({
+        name: '字典查看',
+        code: 'dictionaries:view',
+        type: PermissionType.API,
+        resource: 'dictionaries',
+        action: 'view',
+        path: '/api/v1/dictionaries',
+        method: 'GET',
+        status: PermissionStatus.ENABLED,
+        description: '查看字典列表',
+        sortOrder: 96,
+      }),
+      permissionRepo.create({
+        name: '字典创建',
+        code: 'dictionaries:create',
+        type: PermissionType.API,
+        resource: 'dictionaries',
+        action: 'create',
+        path: '/api/v1/dictionaries',
+        method: 'POST',
+        status: PermissionStatus.ENABLED,
+        description: '创建字典',
+        sortOrder: 97,
+      }),
+      permissionRepo.create({
+        name: '字典更新',
+        code: 'dictionaries:update',
+        type: PermissionType.API,
+        resource: 'dictionaries',
+        action: 'update',
+        path: '/api/v1/dictionaries/:id',
+        method: 'PUT',
+        status: PermissionStatus.ENABLED,
+        description: '更新字典',
+        sortOrder: 98,
+      }),
+      permissionRepo.create({
+        name: '字典删除',
+        code: 'dictionaries:delete',
+        type: PermissionType.API,
+        resource: 'dictionaries',
+        action: 'delete',
+        path: '/api/v1/dictionaries/:id',
+        method: 'DELETE',
+        status: PermissionStatus.ENABLED,
+        description: '删除字典',
+        sortOrder: 99,
+      }),
+    );
+
     const savedPermissions = await permissionRepo.save(permissions);
     console.log(`✅ 创建了 ${savedPermissions.length} 个权限`);
 
@@ -798,6 +850,23 @@ async function initPermissionSystem() {
         status: MenuStatus.ENABLED,
         permissionCode: 'system:info:view',
         description: '查看系统信息',
+      }),
+    );
+
+    childMenus.push(
+      menuRepo.create({
+        name: 'dictionaries',
+        title: '字典管理',
+        path: '/dictionaries',
+        component: 'dictionaries',
+        icon: 'BookOpen',
+        code: 'menu:system:dictionaries',
+        type: MenuType.MENU,
+        parentId: systemMenuId,
+        sortOrder: 5,
+        status: MenuStatus.ENABLED,
+        permissionCode: 'dictionaries:view',
+        description: '管理系统数据字典',
       }),
     );
 
