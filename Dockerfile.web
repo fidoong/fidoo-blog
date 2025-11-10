@@ -1,5 +1,5 @@
 # 前台网站 Dockerfile
-FROM node:20-alpine AS base
+FROM node:lts-alpine AS base
 
 # 安装 pnpm
 RUN npm install -g pnpm@10.20.0
@@ -8,12 +8,13 @@ RUN npm install -g pnpm@10.20.0
 WORKDIR /app
 
 # 复制 package 文件
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml* ./
 COPY packages/shared/package.json ./packages/shared/
 COPY web/package.json ./web/
 
-# 安装依赖
-RUN pnpm install --frozen-lockfile
+# 安装依赖（如果有 lock 文件使用 frozen，否则正常安装）
+RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else pnpm install; fi
 
 # 复制源代码
 COPY packages/shared ./packages/shared
@@ -33,7 +34,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @fidoo-blog/web build
 
 # 生产阶段
-FROM node:20-alpine AS production
+FROM node:lts-alpine AS production
 
 WORKDIR /app
 
