@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'  # Docker Compose v2 不再需要 version
 
 # 生产环境 Docker Compose 配置
 # 用法: docker-compose -f docker-compose.prod.yml up -d
