@@ -36,17 +36,17 @@ print_error() {
 # 检查依赖
 check_dependencies() {
     print_info "检查依赖..."
-    
+
     if ! command -v pnpm &> /dev/null; then
         print_error "pnpm 未安装，请先安装 pnpm"
         exit 1
     fi
-    
+
     if ! command -v node &> /dev/null; then
         print_error "node 未安装，请先安装 Node.js"
         exit 1
     fi
-    
+
     print_success "依赖检查通过"
 }
 
@@ -88,17 +88,17 @@ build_admin() {
 # 构建所有
 build_all() {
     print_info "开始构建所有项目..."
-    
+
     # 先构建共享包
     build_shared
-    
+
     # 然后构建其他项目（依赖共享包）
     build_service
     build_web
     build_admin
-    
+
     print_success "所有项目构建完成"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  ✅ 构建完成"
@@ -114,17 +114,17 @@ build_all() {
 main() {
     local target=${1:-all}
     local clean=${2:-false}
-    
+
     print_info "Fidoo Blog 构建脚本"
     echo ""
-    
+
     check_dependencies
-    
+
     # 如果需要清理
     if [ "$clean" = "clean" ] || [ "$clean" = "true" ]; then
         clean_build
     fi
-    
+
     case $target in
         shared)
             build_shared
@@ -150,3 +150,35 @@ main() {
 # 运行主函数
 main "$@"
 
+
+
+echo ""
+echo "配置阿里云镜像加速器..."
+echo "如果还没有获取专属地址，可以使用以下公共地址："
+
+systemctl stop docker
+
+# 使用阿里云公共镜像加速（如果专属地址不可用，可以尝试这个）
+cat > /etc/docker/daemon.json << 'EOF'
+{
+  "registry-mirrors": ["https://ew8sweml.mirror.aliyuncs.com"]
+  "max-concurrent-downloads": 10,
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+EOF
+
+systemctl daemon-reload
+systemctl start docker
+sleep 10
+
+# 4. 验证配置
+docker info | grep -A 5 "Registry Mirrors"
+
+# 5. 测试拉取（使用小镜像）
+echo ""
+echo "测试拉取 hello-world 镜像..."
+timeout 120 docker pull hello-world

@@ -67,7 +67,7 @@ services:
   service:
     build:
       context: .
-      dockerfile: Dockerfile.service
+      dockerfile: ./Dockerfile.service
     container_name: fidoo-blog-service-prod
     restart: always
     environment:
@@ -115,7 +115,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.web
+      dockerfile: ./Dockerfile.web
     container_name: fidoo-blog-web-prod
     restart: always
     environment:
@@ -144,7 +144,7 @@ services:
   admin:
     build:
       context: .
-      dockerfile: Dockerfile.admin
+      dockerfile: ./Dockerfile.admin
     container_name: fidoo-blog-admin-prod
     restart: always
     environment:
