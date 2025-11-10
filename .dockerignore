@@ -6,10 +6,10 @@ package-lock.json
 yarn.lock
 
 # Build outputs
-dist
-build
 .next
 out
+dist
+build
 *.tsbuildinfo
 
 # Logs
@@ -23,6 +23,7 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # IDE
 .vscode
@@ -35,18 +36,27 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Generated files
+# Git
+.git
+.gitignore
+
+# Test
 coverage
 .nyc_output
-
-# Database
-*.db
-*.sqlite
-
-# Uploads
-uploads
-service/uploads
 
 # Cache
 .turbo
 .cache
+
+# Scripts (不需要在 Docker 中)
+scripts
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+

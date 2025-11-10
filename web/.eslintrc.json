@@ -1,4 +1,20 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": ["next.config.js"]
+  "ignorePatterns": ["next.config.js"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "react-hooks/exhaustive-deps": "warn",
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "semi": ["error", "always"],
+    "comma-dangle": ["error", "always-multiline"],
+    "max-len": ["warn", { "code": 100, "ignoreUrls": true, "ignoreStrings": true }]
+  }
 }

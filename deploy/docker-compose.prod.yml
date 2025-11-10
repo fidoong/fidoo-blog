@@ -1,0 +1,181 @@
+version: '3.8'
+
+# 生产环境 Docker Compose 配置
+# 用法: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: fidoo-blog-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-C6smYzpjKKUVlr1xHrECiJbaqMitM0QV}
+      POSTGRES_DB: ${DB_DATABASE:-fidoo_blog}
+    ports:
+      - "127.0.0.1:5432:5432"  # 只绑定本地，通过 Nginx 访问
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fidoo-blog-prod-network
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c max_connections=200
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: fidoo-blog-redis-prod
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"  # 只绑定本地
+    volumes:
+      - redis_prod_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-y05lFupXH5jquE5s3ZXCnQi7PEun0W9x}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fidoo-blog-prod-network
+
+  # 后端服务
+  service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: fidoo-blog-service-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      DB_TYPE: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-C6smYzpjKKUVlr1xHrECiJbaqMitM0QV}
+      DB_DATABASE: ${DB_DATABASE:-fidoo_blog}
+      DB_SYNCHRONIZE: "false"
+      DB_LOGGING: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-y05lFupXH5jquE5s3ZXCnQi7PEun0W9x}
+      REDIS_DB: 0
+      JWT_SECRET: ${JWT_SECRET:-WK3aX0sFWQCsE0nzRW9kAxbU7gTd1sw0RpnHJFRdmDo=}
+      JWT_EXPIRES_IN: 7d
+    volumes:
+      - ./service/uploads:/app/service/uploads
+      - ./service/logs:/app/service/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fidoo-blog-prod-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # 前台网站
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: fidoo-blog-web-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://YOUR_SERVER_IP:3005/api/v1}
+    depends_on:
+      - service
+    networks:
+      - fidoo-blog-prod-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # 后台管理
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    container_name: fidoo-blog-admin-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://YOUR_SERVER_IP:3005/api/v1}
+    depends_on:
+      - service
+    networks:
+      - fidoo-blog-prod-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+volumes:
+  postgres_prod_data:
+    driver: local
+  redis_prod_data:
+    driver: local
+
+networks:
+  fidoo-blog-prod-network:
+    driver: bridge
+

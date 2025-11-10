@@ -1,22 +1,29 @@
+version: '3.8'
+
+# 开发环境 Docker Compose 配置
+# 只包含数据库和 Redis，应用在本地运行
+
 services:
   # PostgreSQL 数据库
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     container_name: fidoo-blog-postgres-dev
     restart: unless-stopped
     environment:
-      POSTGRES_DB: fidoo_blog
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fidoo_blog
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - fidoo-blog-dev-network
 
   # Redis 缓存
   redis:
@@ -24,19 +31,25 @@ services:
     container_name: fidoo-blog-redis-dev
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
-      - redis_data_dev:/data
+      - redis_dev_data:/data
+    command: redis-server --appendonly yes
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
-    command: redis-server --appendonly yes
+    networks:
+      - fidoo-blog-dev-network
 
 volumes:
-  postgres_data_dev:
+  postgres_dev_data:
     driver: local
-  redis_data_dev:
+  redis_dev_data:
     driver: local
+
+networks:
+  fidoo-blog-dev-network:
+    driver: bridge
 

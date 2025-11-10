@@ -5,11 +5,10 @@ module.exports = {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
@@ -17,7 +16,11 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    'prettier/prettier': 'error',
+    'indent': ['error', 2, { SwitchCase: 1 }],
+    'quotes': ['error', 'single', { avoidEscape: true }],
+    'semi': ['error', 'always'],
+    'comma-dangle': ['error', 'always-multiline'],
+    'max-len': ['warn', { code: 100, ignoreUrls: true, ignoreStrings: true }],
   },
   ignorePatterns: ['.eslintrc.js', 'dist', 'node_modules', 'build', '.next'],
 };

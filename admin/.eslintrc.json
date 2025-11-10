@@ -1,10 +1,8 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "next/typescript",
-    "prettier"
+    "next/typescript"
   ],
-  "plugins": ["prettier"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": [
@@ -15,6 +13,10 @@
       }
     ],
     "react-hooks/exhaustive-deps": "warn",
-    "prettier/prettier": "error"
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "semi": ["error", "always"],
+    "comma-dangle": ["error", "always-multiline"],
+    "max-len": ["warn", { "code": 100, "ignoreUrls": true, "ignoreStrings": true }]
   }
 }

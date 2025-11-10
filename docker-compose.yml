@@ -1,62 +1,74 @@
+version: '3.8'
+
 services:
   # PostgreSQL 数据库
   postgres:
-    image: registry.cn-hangzhou.aliyuncs.com/acs/postgres:16-alpine
+    image: postgres:15-alpine
     container_name: fidoo-blog-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: fidoo_blog
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fidoo_blog
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - fidoo-blog-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - fidoo-blog-network
 
   # Redis 缓存
   redis:
-    image: registry.cn-hangzhou.aliyuncs.com/acs/redis:7-alpine
+    image: redis:7-alpine
     container_name: fidoo-blog-redis
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis_data:/data
-    networks:
-      - fidoo-blog-network
+    command: redis-server --appendonly yes
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
-    command: redis-server --appendonly yes
+    networks:
+      - fidoo-blog-network
 
   # 后端服务
   service:
     build:
       context: .
-      dockerfile: ./service/Dockerfile
+      dockerfile: Dockerfile.service
     container_name: fidoo-blog-service
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - "3005:3005"
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 3005
+      DB_TYPE: postgres
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_DATABASE: fidoo_blog
+      DB_SYNCHRONIZE: "false"
+      DB_LOGGING: "false"
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-key-in-production}
+      JWT_EXPIRES_IN: 7d
+    volumes:
+      - ./service/uploads:/app/service/uploads
+      - ./service/logs:/app/service/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,61 +76,57 @@ services:
         condition: service_healthy
     networks:
       - fidoo-blog-network
-    volumes:
-      - ./service/uploads:/app/uploads
-      - ./service/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # 前台网站
   web:
     build:
       context: .
-      dockerfile: ./web/Dockerfile
+      dockerfile: Dockerfile.web
     container_name: fidoo-blog-web
     restart: unless-stopped
     ports:
-      - '3001:3000'
+      - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://service:3000/api
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:3005/api/v1
     depends_on:
       - service
     networks:
       - fidoo-blog-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # 后台管理
   admin:
     build:
       context: .
-      dockerfile: ./admin/Dockerfile
+      dockerfile: Dockerfile.admin
     container_name: fidoo-blog-admin
     restart: unless-stopped
     ports:
-      - '3002:3000'
+      - "3001:3001"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://service:3000/api
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: http://localhost:3005/api/v1
     depends_on:
       - service
     networks:
       - fidoo-blog-network
-
-  # Nginx 反向代理
-  nginx:
-    image: registry.cn-hangzhou.aliyuncs.com/acs/nginx:alpine
-    container_name: fidoo-blog-nginx
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - service
-      - web
-      - admin
-    networks:
-      - fidoo-blog-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:
@@ -129,3 +137,4 @@ volumes:
 networks:
   fidoo-blog-network:
     driver: bridge
+
