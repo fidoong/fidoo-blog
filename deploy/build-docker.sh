@@ -39,12 +39,12 @@ check_images() {
     )
 
     MISSING_IMAGES=()
-    
+
     for image in "${REQUIRED_IMAGES[@]}"; do
         # 解析镜像名和标签（格式：repository:tag）
         REPO=$(echo "$image" | cut -d: -f1)
         TAG=$(echo "$image" | cut -d: -f2)
-        
+
         # 检查镜像是否存在（docker images 输出格式：REPOSITORY TAG ...）
         if docker images "$REPO" | grep -qE "^${REPO}[[:space:]]+${TAG}[[:space:]]"; then
             print_success "✅ 镜像已存在: $image"
@@ -82,6 +82,25 @@ check_images() {
     echo ""
 }
 
+# 检查 Docker 版本是否支持 --pull 参数
+check_docker_pull_support() {
+    # 检查 Docker 版本（格式：Docker version 20.10.0, build xxxxx）
+    DOCKER_VERSION=$(docker --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    if [ -z "$DOCKER_VERSION" ]; then
+        return 1
+    fi
+
+    # 比较版本（20.10.0 及以上支持 --pull=never）
+    MAJOR=$(echo "$DOCKER_VERSION" | cut -d. -f1)
+    MINOR=$(echo "$DOCKER_VERSION" | cut -d. -f2)
+
+    if [ "$MAJOR" -gt 20 ] || ([ "$MAJOR" -eq 20 ] && [ "$MINOR" -ge 10 ]); then
+        return 0  # 支持
+    else
+        return 1  # 不支持
+    fi
+}
+
 # 构建 Docker 镜像
 build_images() {
     print_info "开始构建 Docker 镜像..."
@@ -89,20 +108,35 @@ build_images() {
 
     # 使用 --no-cache 选项可以强制重新构建，默认使用缓存
     NO_CACHE=${1:-""}
-    
+
     # 使用 docker build 直接构建，而不是 docker-compose build
-    # 明确指定 --pull=false 确保使用本地镜像，不尝试从网络拉取
+    # 禁用 BuildKit 以避免尝试解析镜像元数据
+    # 当 BuildKit 禁用时，Docker 会优先使用本地镜像，不会尝试从网络拉取
     print_info "使用 docker build 直接构建（完全使用本地镜像，不尝试网络拉取）"
-    
-    BUILD_ARGS="--pull=false"
+    print_info "禁用 BuildKit 以避免网络元数据解析"
+
+    BUILD_ARGS=""
+
+    # 检查是否支持 --pull=never 参数
+    if check_docker_pull_support; then
+        BUILD_ARGS="--pull=never"
+        print_info "检测到 Docker 版本支持 --pull=never，使用该参数"
+    else
+        print_info "Docker 版本较旧，仅禁用 BuildKit（不使用 --pull 参数）"
+    fi
+
     if [ "$NO_CACHE" = "--no-cache" ]; then
-        BUILD_ARGS="$BUILD_ARGS --no-cache"
+        if [ -n "$BUILD_ARGS" ]; then
+            BUILD_ARGS="$BUILD_ARGS --no-cache"
+        else
+            BUILD_ARGS="--no-cache"
+        fi
         print_warning "使用 --no-cache 选项，将强制重新构建"
     fi
-    
+
     # 构建 service
     print_info "构建 service..."
-    docker build $BUILD_ARGS \
+    DOCKER_BUILDKIT=0 docker build $BUILD_ARGS \
         -f Dockerfile.service \
         -t fidoo-blog-service:latest \
         . || {
@@ -111,10 +145,10 @@ build_images() {
     }
     print_success "service 构建完成"
     echo ""
-    
+
     # 构建 web
     print_info "构建 web..."
-    docker build $BUILD_ARGS \
+    DOCKER_BUILDKIT=0 docker build $BUILD_ARGS \
         -f Dockerfile.web \
         -t fidoo-blog-web:latest \
         . || {
@@ -123,10 +157,10 @@ build_images() {
     }
     print_success "web 构建完成"
     echo ""
-    
+
     # 构建 admin
     print_info "构建 admin..."
-    docker build $BUILD_ARGS \
+    DOCKER_BUILDKIT=0 docker build $BUILD_ARGS \
         -f Dockerfile.admin \
         -t fidoo-blog-admin:latest \
         . || {
