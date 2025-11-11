@@ -38,12 +38,13 @@ WORKDIR /app
 RUN npm install -g pnpm@10.20.0
 
 # 复制 package 文件
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml* ./
 COPY packages/shared/package.json ./packages/shared/
 COPY service/package.json ./service/
 
-# 只安装生产依赖
-RUN pnpm install --frozen-lockfile --prod
+# 只安装生产依赖（如果有 lock 文件使用 frozen，否则正常安装）
+RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile --prod; else pnpm install --prod; fi
 
 # 从构建阶段复制构建产物
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist

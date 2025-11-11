@@ -1,4 +1,4 @@
-# version: '3.8'  # Docker Compose v2 不再需要 version
+# Docker Compose v2 不再需要 version
 
 # 生产环境 Docker Compose 配置
 # 用法: docker-compose -f docker-compose.prod.yml up -d
@@ -6,7 +6,7 @@
 services:
   # PostgreSQL 数据库
   postgres:
-    image: postgres:15-alpine
+    image: postgres:14-alpine
     container_name: fidoo-blog-postgres-prod
     restart: always
     environment:
@@ -42,7 +42,7 @@ services:
 
   # Redis 缓存
   redis:
-    image: redis:7-alpine
+    image: redis:6-alpine
     container_name: fidoo-blog-redis-prod
     restart: always
     ports:
