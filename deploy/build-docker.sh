@@ -90,17 +90,13 @@ build_images() {
     # 使用 --no-cache 选项可以强制重新构建，默认使用缓存
     NO_CACHE=${1:-""}
     
-    # 设置环境变量，防止 Docker 尝试从网络拉取镜像
-    export DOCKER_BUILDKIT=0  # 禁用 BuildKit，避免网络请求
-    export COMPOSE_DOCKER_CLI_BUILD=0
-    
     # 使用 docker build 直接构建，而不是 docker-compose build
-    # 这样可以完全控制，避免网络请求
+    # 不设置 --pull 选项，Docker 会使用本地镜像（如果存在）
     print_info "使用 docker build 直接构建（完全使用本地镜像，不尝试网络拉取）"
     
-    BUILD_ARGS="--pull=never"
+    BUILD_ARGS=""
     if [ "$NO_CACHE" = "--no-cache" ]; then
-        BUILD_ARGS="$BUILD_ARGS --no-cache"
+        BUILD_ARGS="--no-cache"
         print_warning "使用 --no-cache 选项，将强制重新构建"
     fi
     
