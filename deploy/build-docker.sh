@@ -91,12 +91,12 @@ build_images() {
     NO_CACHE=${1:-""}
     
     # 使用 docker build 直接构建，而不是 docker-compose build
-    # 不设置 --pull 选项，Docker 会使用本地镜像（如果存在）
+    # 明确指定 --pull=false 确保使用本地镜像，不尝试从网络拉取
     print_info "使用 docker build 直接构建（完全使用本地镜像，不尝试网络拉取）"
     
-    BUILD_ARGS=""
+    BUILD_ARGS="--pull=false"
     if [ "$NO_CACHE" = "--no-cache" ]; then
-        BUILD_ARGS="--no-cache"
+        BUILD_ARGS="$BUILD_ARGS --no-cache"
         print_warning "使用 --no-cache 选项，将强制重新构建"
     fi
     
