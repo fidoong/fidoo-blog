@@ -70,21 +70,6 @@ check_images() {
     echo ""
 }
 
-# 检查 Docker 版本是否支持 --pull 参数
-check_docker_pull_support() {
-    DOCKER_VERSION=$(docker --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-    if [ -z "$DOCKER_VERSION" ]; then
-        return 1
-    fi
-    MAJOR=$(echo "$DOCKER_VERSION" | cut -d. -f1)
-    MINOR=$(echo "$DOCKER_VERSION" | cut -d. -f2)
-    if [ "$MAJOR" -gt 20 ] || ([ "$MAJOR" -eq 20 ] && [ "$MINOR" -ge 10 ]); then
-        return 0
-    else
-        return 1
-    fi
-}
-
 # 使用 docker build 直接构建
 build_with_docker() {
     print_info "使用 docker build 直接构建（不尝试从网络拉取）..."
@@ -94,13 +79,9 @@ build_with_docker() {
     NO_CACHE=${1:-""}
     BUILD_ARGS=""
 
-    # 检查是否支持 --pull=never 参数
-    if check_docker_pull_support; then
-        BUILD_ARGS="--pull=never"
-        print_info "检测到 Docker 版本支持 --pull=never，使用该参数"
-    else
-        print_info "Docker 版本较旧，仅禁用 BuildKit（不使用 --pull 参数）"
-    fi
+    # 使用 --pull=false 确保不拉取镜像（传统构建器只支持 true/false）
+    BUILD_ARGS="--pull=false"
+    print_info "使用 --pull=false 确保不拉取网络镜像"
 
     if [ "$NO_CACHE" = "--no-cache" ]; then
         if [ -n "$BUILD_ARGS" ]; then

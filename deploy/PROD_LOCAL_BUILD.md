@@ -34,14 +34,14 @@ service:
 
 此脚本会：
 - ✅ 检查必需的本地镜像是否存在
-- ✅ 自动检测 Docker 版本，如果支持则使用 `--pull=never`（Docker 20.10+）
+- ✅ 使用 `--pull=false` 确保不拉取网络镜像
 - ✅ 禁用 BuildKit 以避免尝试解析镜像元数据
 - ✅ 构建所有服务镜像（service、web、admin）
 
 #### 方法 2: 使用 build-docker-direct.sh
 
 ```bash
-# 使用 --pull=never 确保不拉取镜像
+# 使用 --pull=false 确保不拉取镜像
 ./deploy/build-docker-direct.sh
 
 # 强制重新构建
@@ -59,16 +59,14 @@ docker-compose -f deploy/docker-compose.prod.yml build
 #### 方法 4: 直接使用 docker build
 
 ```bash
-# 构建后端服务（禁用 BuildKit 以避免元数据解析）
-# 如果 Docker 版本 >= 20.10，可以使用 --pull=never
-# 否则只使用 DOCKER_BUILDKIT=0
-DOCKER_BUILDKIT=0 docker build -f Dockerfile.service -t fidoo-blog-service:latest .
+# 构建后端服务（禁用 BuildKit 并使用 --pull=false）
+DOCKER_BUILDKIT=0 docker build --pull=false -f Dockerfile.service -t fidoo-blog-service:latest .
 
 # 构建前台网站
-DOCKER_BUILDKIT=0 docker build -f Dockerfile.web -t fidoo-blog-web:latest .
+DOCKER_BUILDKIT=0 docker build --pull=false -f Dockerfile.web -t fidoo-blog-web:latest .
 
 # 构建后台管理
-DOCKER_BUILDKIT=0 docker build -f Dockerfile.admin -t fidoo-blog-admin:latest .
+DOCKER_BUILDKIT=0 docker build --pull=false -f Dockerfile.admin -t fidoo-blog-admin:latest .
 ```
 
 ## 完整部署流程
