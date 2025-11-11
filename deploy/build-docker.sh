@@ -91,24 +91,54 @@ build_images() {
     NO_CACHE=${1:-""}
     
     # 设置环境变量，防止 Docker 尝试从网络拉取镜像
-    export DOCKER_BUILDKIT=1
-    export COMPOSE_DOCKER_CLI_BUILD=1
+    export DOCKER_BUILDKIT=0  # 禁用 BuildKit，避免网络请求
+    export COMPOSE_DOCKER_CLI_BUILD=0
     
-    # 使用 --pull=never 选项（如果支持）或通过环境变量禁用拉取
+    # 使用 docker build 直接构建，而不是 docker-compose build
+    # 这样可以完全控制，避免网络请求
+    print_info "使用 docker build 直接构建（完全使用本地镜像，不尝试网络拉取）"
+    
+    BUILD_ARGS="--pull=never"
     if [ "$NO_CACHE" = "--no-cache" ]; then
-        print_warning "使用 --no-cache 选项，将强制重新构建（不使用缓存）"
-        print_info "使用本地镜像，不尝试从网络拉取"
-        # docker-compose build 不支持 --pull=never，但我们可以通过其他方式
-        # 先尝试使用 --pull never（如果支持）
-        docker-compose -f deploy/docker-compose.prod.yml build --no-cache --pull never 2>/dev/null || \
-        docker-compose -f deploy/docker-compose.prod.yml build --no-cache
-    else
-        print_info "使用缓存构建（如果 Dockerfile 或代码未更改，将使用缓存）"
-        print_info "使用本地镜像，不尝试从网络拉取"
-        # 尝试使用 --pull never
-        docker-compose -f deploy/docker-compose.prod.yml build --pull never 2>/dev/null || \
-        docker-compose -f deploy/docker-compose.prod.yml build
+        BUILD_ARGS="$BUILD_ARGS --no-cache"
+        print_warning "使用 --no-cache 选项，将强制重新构建"
     fi
+    
+    # 构建 service
+    print_info "构建 service..."
+    docker build $BUILD_ARGS \
+        -f Dockerfile.service \
+        -t fidoo-blog-service:latest \
+        . || {
+        print_error "service 构建失败"
+        exit 1
+    }
+    print_success "service 构建完成"
+    echo ""
+    
+    # 构建 web
+    print_info "构建 web..."
+    docker build $BUILD_ARGS \
+        -f Dockerfile.web \
+        -t fidoo-blog-web:latest \
+        . || {
+        print_error "web 构建失败"
+        exit 1
+    }
+    print_success "web 构建完成"
+    echo ""
+    
+    # 构建 admin
+    print_info "构建 admin..."
+    docker build $BUILD_ARGS \
+        -f Dockerfile.admin \
+        -t fidoo-blog-admin:latest \
+        . || {
+        print_error "admin 构建失败"
+        exit 1
+    }
+    print_success "admin 构建完成"
+    echo ""
 
     print_success "Docker 镜像构建完成"
     echo ""
