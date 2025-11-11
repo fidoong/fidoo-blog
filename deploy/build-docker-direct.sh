@@ -41,7 +41,12 @@ check_images() {
     MISSING_IMAGES=()
     
     for image in "${REQUIRED_IMAGES[@]}"; do
-        if docker images | grep -q "$image"; then
+        # 解析镜像名和标签（格式：repository:tag）
+        REPO=$(echo "$image" | cut -d: -f1)
+        TAG=$(echo "$image" | cut -d: -f2)
+        
+        # 检查镜像是否存在（docker images 输出格式：REPOSITORY TAG ...）
+        if docker images "$REPO" | grep -qE "^${REPO}[[:space:]]+${TAG}[[:space:]]"; then
             print_success "✅ 镜像已存在: $image"
         else
             print_warning "⚠️  镜像不存在: $image"
