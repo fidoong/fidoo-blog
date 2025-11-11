@@ -149,36 +149,3 @@ main() {
 
 # 运行主函数
 main "$@"
-
-
-
-echo ""
-echo "配置阿里云镜像加速器..."
-echo "如果还没有获取专属地址，可以使用以下公共地址："
-
-systemctl stop docker
-
-# 使用阿里云公共镜像加速（如果专属地址不可用，可以尝试这个）
-cat > /etc/docker/daemon.json << 'EOF'
-{
-  "registry-mirrors": ["https://ew8sweml.mirror.aliyuncs.com"]
-  "max-concurrent-downloads": 10,
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  }
-}
-EOF
-
-systemctl daemon-reload
-systemctl start docker
-sleep 10
-
-# 4. 验证配置
-docker info | grep -A 5 "Registry Mirrors"
-
-# 5. 测试拉取（使用小镜像）
-echo ""
-echo "测试拉取 hello-world 镜像..."
-timeout 120 docker pull hello-world

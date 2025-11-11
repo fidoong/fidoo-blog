@@ -53,11 +53,48 @@ if [ $IMPORTED -gt 0 ]; then
     echo "📋 已导入的镜像："
     docker images | grep -E "node|postgres|redis" | head -10
     echo ""
+
+    # 检查并打标签（确保标签匹配 Dockerfile 需要的）
+    echo "🔍 检查镜像标签..."
+    echo ""
+
+    # 检查 node 镜像
+    if docker images | grep -q "node.*latest"; then
+        if ! docker images | grep -q "node.*20-alpine"; then
+            echo "📝 为 node:latest 打标签 node:20-alpine"
+            docker tag node:latest node:20-alpine
+            echo "✅ 标签已创建"
+        fi
+    fi
+
+    # 检查 postgres 镜像
+    if docker images | grep -q "postgres.*latest"; then
+        if ! docker images | grep -q "postgres.*14-alpine"; then
+            echo "📝 为 postgres:latest 打标签 postgres:14-alpine"
+            docker tag postgres:latest postgres:14-alpine
+            echo "✅ 标签已创建"
+        fi
+    fi
+
+    # 检查 redis 镜像
+    if docker images | grep -q "redis.*latest"; then
+        if ! docker images | grep -q "redis.*6-alpine"; then
+            echo "📝 为 redis:latest 打标签 redis:6-alpine"
+            docker tag redis:latest redis:6-alpine
+            echo "✅ 标签已创建"
+        fi
+    fi
+
+    echo ""
+    echo "📋 最终镜像列表："
+    docker images | grep -E "node|postgres|redis" | head -10
+    echo ""
     echo "🎯 下一步："
-    echo "1. 根据导入的镜像更新 Dockerfile（如果需要）"
-    echo "2. 运行构建："
+    echo "1. 运行构建："
+    echo "   ./deploy/build-docker.sh"
+    echo "   或"
     echo "   docker-compose -f deploy/docker-compose.prod.yml build"
-    echo "3. 启动服务："
+    echo "2. 启动服务："
     echo "   docker-compose -f deploy/docker-compose.prod.yml up -d"
 else
     echo "❌ 没有成功导入任何镜像"
